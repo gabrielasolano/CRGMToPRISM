@@ -1,29 +1,38 @@
 grammar CtxRegex;
+
+@rulecatch {
+   catch (RecognitionException e) {
+    throw e;
+   }
+}
+
 ctx:	ctx NEWLINE					# printExpr
 	|	'assertion condition 'expr 	# condition
 	|	'assertion trigger 'expr 	# trigger
 	|	NEWLINE                     # blank
 	;
 
-expr:	expr op='<' expr			# cLT
-    |	expr op='<=' expr			# cLE
-    |	expr op='>' expr			# cGT
-    |	expr op='>=' expr			# cGE        
-	|	expr op='=' expr			# cEQ
-	|	expr op='!=' expr			# cDIFF
-	|	expr op='&' expr			# cAnd
-	|	expr op='|' expr			# cOr	
-	|	BOOL						# cBool  
-    |   VAR                         # cVar
-    |   FLOAT						# cFloat
-    |   '(' expr ')'                # cParens
-    ;
+expr:	VAR op='<' value			#cLT
+	|	VAR op='<=' value			#cLE
+	|	VAR op='>' value			#cGT
+	|	VAR op='>=' value			#cGE
+	|	VAR op='=' value			#cEQ
+	|	VAR op='!=' value			#cDIFF
+	|	VAR op='&' VAR				#cAnd
+	|	VAR op='|' VAR				#cOr
+	| 	VAR							#cVar
+	;
 
-BOOL		: [false|true] 					;
-VAR     	: ('a'..'z'|'A'..'Z'|'_')+DIGIT	;
-FLOAT		: DIGIT+'.'?DIGIT* 				;
-NEWLINE 	: [\r\n]+             			;
-WS	        : (' '|'\t')+ -> skip 			;
+value:	FLOAT						#cFloat
+	|	BOOL						#cBool
+	;
+
+VAR     	: LETTER+DIGIT*WS*			;
+FLOAT		: DIGIT+'.'?DIGIT* 			;
+BOOL		: WS*('false'|'true')WS*	;
+NEWLINE 	: [\r\n]+     				;
+WS	        : (' '|'\t')+ -> skip 		;
 
 fragment
-DIGIT		: [0-9]							;
+DIGIT		: [0-9]						;
+LETTER		: [a-zA-Z_]					;

@@ -20,8 +20,8 @@ public class SameIdentifierGoalTest {
 	
 	@Test
 	public void TestCase15() {
-		String goalName = "G1:_primeiro";
-		String[] elementsName = {"G1:_segundo", "1", "1"};
+		String goalName = "G1: first";
+		String[] elementsName = {"G1: second", "1", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -39,15 +39,16 @@ public class SameIdentifierGoalTest {
 			fail("No exception found.");
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	
 	@Test
 	public void TestCase16() {
-		String goalName = "G1:_primeiro";
-		String[] elementsName = {"G1:_segundo", "1", "1",
-				"G1:_terceiro", "1", "2",
-				"G1:_quarto", "1", "3"};
+		String goalName = "G1: first";
+		String[] elementsName = {"G1: second", "1", "1",
+				"G1: third", "1", "2",
+				"G1: fourth", "1", "3"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -65,6 +66,7 @@ public class SameIdentifierGoalTest {
 			fail("No exception found.");
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 

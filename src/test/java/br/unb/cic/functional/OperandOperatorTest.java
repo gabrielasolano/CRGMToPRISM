@@ -20,9 +20,9 @@ public class OperandOperatorTest {
 
 	@Test
 	public void TestCase32() {
-		String goalName = "G1:_anotação_de_contexto_incorreta";	
-		String contextAnnotation = "assertion condition 2OPERANDO = 7\n";
-		String[] elementsName = {"T1:_folha", "1", "1"};
+		String goalName = "G1: invalid context annotation";	
+		String contextAnnotation = "assertion condition 2OPERAND = 7\n";
+		String[] elementsName = {"T1: task", "1", "1"};
 
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -41,14 +41,15 @@ public class OperandOperatorTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 
 	@Test
 	public void TestCase33() {
-		String goalName = "G1:_anotação_de_contexto_incorreta";
-		String[] elementsName = {"T1:_folha", "1", "1"};
-		String contextAnnotation = "assertion condition OPERANDO + 7\n";
+		String goalName = "G1: invalid context annotation";
+		String[] elementsName = {"T1: task", "1", "1"};
+		String contextAnnotation = "assertion condition OPERAND + 7\n";
 
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -67,6 +68,7 @@ public class OperandOperatorTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 

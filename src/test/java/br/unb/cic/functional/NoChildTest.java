@@ -21,7 +21,7 @@ public class NoChildTest {
 	
 	@Test
 	public void TestCase7() {
-		String goalName = "G1:_nenhum_filho_[T1@2]";
+		String goalName = "G1: no child [T1@2]";
 		
 		//Add elements to new register
 		InformationRegister[] info = null;
@@ -40,13 +40,14 @@ public class NoChildTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	
 	@Test
 	public void TestCase8() {
-		String goalName = "G1:_erro_na_tarefa";
-		String[] elementsName = {"T1:_nenhum_filho_[T1.1@2]", "1", "1"};
+		String goalName = "G1: task error";
+		String[] elementsName = {"T1: no child [T1.1@2]", "1", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -65,6 +66,7 @@ public class NoChildTest {
 						
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	

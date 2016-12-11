@@ -20,9 +20,9 @@ public class MultipleLevelTaskIdentifierTest {
 	
 	@Test
 	public void TestCase19() {
-		String goalName = "G1:_um_filho";
-		String[] elementsName = {"T1:_um_filho_de_identificador_incorreto", "1", "1",
-				"T11:_folha", "1", "2"};
+		String goalName = "G1: one child";
+		String[] elementsName = {"T1: one child with wrong identifier", "1", "1",
+				"T11: leaf", "1", "2"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -41,15 +41,16 @@ public class MultipleLevelTaskIdentifierTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	
 	@Test
 	public void TestCase20() {
-		String goalName = "G1:_um_filho";
-		String[] elementsName = {"T1:_um_filho", "1", "1",
-				"T1.1:_um_filho_de_identificador_incorreto", "1", "2",
-				"T1.21:_folha", "1", "3"};
+		String goalName = "G1: one child";
+		String[] elementsName = {"T1: one child", "1", "1",
+				"T1.1: one child with wrong identifier", "1", "2",
+				"T1.21: leaf", "1", "3"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -68,6 +69,7 @@ public class MultipleLevelTaskIdentifierTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	

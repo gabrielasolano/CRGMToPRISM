@@ -20,9 +20,9 @@ public class NoRuntimeAnnotationTest {
 	
 	@Test
 	public void TestCase21() {
-		String goalName = "G0:_sem_colchetes_G1;G2";
-		String[] elementsName = {"G1:_folha_um", "1", "1",
-				"G2:_folha_dois", "2", "1"};
+		String goalName = "G0: no brackets G1;G2";
+		String[] elementsName = {"G1: leaf one", "1", "1",
+				"G2: leaf two", "2", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -42,14 +42,15 @@ public class NoRuntimeAnnotationTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	
 	@Test
 	public void TestCase22() {
-		String goalName = "G0:_[G1;G2]_lugar_errado";
-		String[] elementsName = {"G1:_folha_um", "1", "1",
-				"G2:_folha_dois", "2", "1"};
+		String goalName = "G0: [G1;G2] wrong place";
+		String[] elementsName = {"G1: leaf one", "1", "1",
+				"G2: leaf two", "2", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -68,6 +69,7 @@ public class NoRuntimeAnnotationTest {
 						
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	

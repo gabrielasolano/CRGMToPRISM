@@ -31,6 +31,7 @@ import br.unb.cic.CtxRegexParser.CVarContext;
 import br.unb.cic.CtxRegexParser.ConditionContext;
 import br.unb.cic.CtxRegexParser.PrintExprContext;
 import br.unb.cic.CtxRegexParser.TriggerContext;
+import br.unb.cic.ThrowingErrorListener;
 import br.unb.cic.rtgoretoprism.model.ctx.ContextCondition;
 import br.unb.cic.rtgoretoprism.model.ctx.CtxSymbols;
 
@@ -53,12 +54,15 @@ public class CtxParser{
 	    
 	    //Passing the input to the lexer to create tokens
 	    CtxRegexLexer lexer = new CtxRegexLexer(cs);
+	    lexer.removeErrorListeners();
+	    lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
 	    
 	    CommonTokenStream tokens = new CommonTokenStream(lexer);
 	    
 	    //Passing the tokens to the parser to create the parse trea. 
 	    CtxRegexParser parser = new CtxRegexParser(tokens);
-	    
+	    parser.removeErrorListeners();
+	    parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 	    //Semantic model to be populated
 	    //Graph g = new Graph();
 	    
@@ -75,6 +79,9 @@ public class CtxParser{
 	    
 	    ParseTree tree = parser.ctx();
 	    CtxFormulaParserVisitor CtxRegexVisitor = new CtxFormulaParserVisitor();
+	    //rtRegexVisitor.visit(tree);
+	    
+	    
 	    return new Object[]{CtxRegexVisitor.memory, CtxRegexVisitor.visit(tree), CtxRegexVisitor.type};
 	    
 	    //return new Object [] 	{CtxRegexVisitor.memory};
@@ -120,68 +127,84 @@ class CtxFormulaParserVisitor extends  CtxRegexBaseVisitor<String> {
 	
 	@Override
 	public String visitCEQ(CEQContext ctx) {
-		String var = visit(ctx.expr(0));
-		String value = visit(ctx.expr(1));
+		String var = ctx.VAR().getText();
+		String value = visit(ctx.value());
+		//String var = visit(ctx.expr(0));
+		//String value = visit(ctx.expr(1));
 		memory.add(new ContextCondition(var, CtxSymbols.EQ,  value));
 		return var + " = " + value;
 	}
 	
 	@Override
 	public String visitCDIFF(CDIFFContext ctx) {
-		String var = visit(ctx.expr(0));
-		String value = visit(ctx.expr(1));
+		String var = ctx.VAR().getText();
+		String value = visit(ctx.value());
+		//String var = visit(ctx.expr(0));
+		//String value = visit(ctx.expr(1));
 		memory.add(new ContextCondition(var, CtxSymbols.DIFF,  value));
 		return var + " != " + value;
 	}
 	
 	@Override
 	public String visitCLE(CLEContext ctx) {
-		String var = visit(ctx.expr(0));
-		String value = visit(ctx.expr(1));
+		String var = ctx.VAR().getText();
+		String value = visit(ctx.value());
+		//String var = visit(ctx.expr(0));
+		//String value = visit(ctx.expr(1));
 		memory.add(new ContextCondition(var, CtxSymbols.LE,  value));
 		return var + " <= " + value;
 	}
 	
 	@Override
 	public String visitCLT(CLTContext ctx) {
-		String var = visit(ctx.expr(0));
-		String value = visit(ctx.expr(1));
+		String var = ctx.VAR().getText();
+		String value = visit(ctx.value());
+		//String var = visit(ctx.expr(0));
+		//String value = visit(ctx.expr(1));
 		memory.add(new ContextCondition(var, CtxSymbols.LT,  value));
 		return var + " < " + value;
 	}
 	
 	@Override
 	public String visitCGE(CGEContext ctx) {
-		String var = visit(ctx.expr(0));
-		String value = visit(ctx.expr(1));
+		String var = ctx.VAR().getText();
+		String value = visit(ctx.value());
+		//String var = visit(ctx.expr(0));
+		//String value = visit(ctx.expr(1));
 		memory.add(new ContextCondition(var, CtxSymbols.GE,  value));
 		return var + " >= " + value;
 	}
 	
 	@Override
 	public String visitCGT(CGTContext ctx) {
-		String var = visit(ctx.expr(0));
-		String value = visit(ctx.expr(1));
+		String var = ctx.VAR().getText();
+		String value = visit(ctx.value());
+		//String var = visit(ctx.expr(0));
+		//String value = visit(ctx.expr(1));
 		memory.add(new ContextCondition(var, CtxSymbols.GT,  value));
 		return var + " > " + value;
 	}
 	
 	@Override
 	public String visitCAnd(CAndContext ctx) {
-		String varA = visit(ctx.expr(0));
-		String varB = visit(ctx.expr(1));
+		String varA = ctx.VAR(0).getText();
+		String varB = ctx.VAR(1).getText();
+		//String varA = visit(ctx.expr(0));
+		//String varB = visit(ctx.expr(1));
 		return varA + " & " + varB;
 	}
 	
 	@Override
 	public String visitCOr(COrContext ctx) {
-		String varA = visit(ctx.expr(0));
-		String varB = visit(ctx.expr(1));
+		String varA = ctx.VAR(0).getText();
+		String varB = ctx.VAR(1).getText();
+		//String varA = visit(ctx.expr(0));
+		//String varB = visit(ctx.expr(1));
 		return varA + " | " + varB;
 	}
 	
 	@Override
-	public String visitCBool(CBoolContext ctx) {		
+	public String visitCBool(CBoolContext ctx) {
 		return ctx.BOOL().getText();
 	}
 	

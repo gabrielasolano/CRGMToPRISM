@@ -24,11 +24,11 @@ public class LabelPatternTest {
 	@Test
 	public void TestCase3() throws IOException {
 
-		String goalName = "Objetivo_principal:_testar_erro_de_padrão_[G1;G2]";
+		String goalName = "Main goal: test pattern error [G1;G2]";
 		
 		//id, branch, depth
-		String[] elementsName = {"G1:_folha_um", "1", "1",
-				"G2:_folha_dois", "2", "1"};
+		String[] elementsName = {"G1: leaf one", "1", "1",
+				"G2: leaf two", "2", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -46,13 +46,14 @@ public class LabelPatternTest {
 			fail("No exception found.");
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 
 	@Test
 	public void TestCase4() {
-		String goalName = "G1:_erro_na_tarefa";
-		String[] elementsName = {"Tarefa_única:_folha", "1", "1"};
+		String goalName = "G1: task error";
+		String[] elementsName = {"Only task: leaf", "1", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -70,13 +71,14 @@ public class LabelPatternTest {
 			fail("No exception found.");
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 
 	@Test
 	public void TestCase5() {
-		String goalName = "G1:_erro_na_tarefa";
-		String[] elementsName = {"T1.1:_teste_de_erro", "1", "1"};
+		String goalName = "G1: task error";
+		String[] elementsName = {"T1.1: error test", "1", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -95,14 +97,15 @@ public class LabelPatternTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	
 	@Test
 	public void TestCase6() {
-		String goalName = "G1:_anotação_de_contexto_incorreta";
-		String[] elementsName = {"T1:_folha", "1", "1"};
-		String contextAnnotation = "assertion condition > OPERANDO 3\n";
+		String goalName = "G1: invalid context annotation";
+		String[] elementsName = {"T1: leaf", "1", "1"};
+		String contextAnnotation = "assertion condition > OPERAND 3\n";
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -121,6 +124,7 @@ public class LabelPatternTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	

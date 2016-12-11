@@ -21,11 +21,11 @@ public class SameIdentifierTaskTest {
 	
 	@Test
 	public void TestCase17() {
-		String goalName = "G1:_um_filho";
-		String[] elementsName = {"T1:_um_filho", "1", "1",
-				"T1.1:_dois_filhos_[T1.11;T1.11]", "1", "2",
-				"T1.11:_folha_um", "1", "3",
-				"T1.11:_folha_dois", "2", "3"};
+		String goalName = "G1: one child";
+		String[] elementsName = {"T1: one child", "1", "1",
+				"T1.1: two children [T1.11;T1.11]", "1", "2",
+				"T1.11: leaf one", "1", "3",
+				"T1.11: leaf two", "2", "3"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -44,16 +44,17 @@ public class SameIdentifierTaskTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	
 	@Test
 	public void TestCase18() {
-		String goalName = "G1:_um_filho";
-		String[] elementsName = {"T1:_três_filhos[T1.1;T1.1;T1.1]", "1", "1",
-				"T1.1:_folha_um", "1", "2",
-				"T1.1:_folha_um", "2", "2",
-				"T1.1:_folha_um", "3", "2"};
+		String goalName = "G1: one child";
+		String[] elementsName = {"T1: three children[T1.1;T1.1;T1.1]", "1", "1",
+				"T1.1: leaf one", "1", "2",
+				"T1.1: leaf two", "2", "2",
+				"T1.1: leaf three", "3", "2"};
 	
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -72,6 +73,7 @@ public class SameIdentifierTaskTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}	
 	}
 	

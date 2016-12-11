@@ -37,11 +37,15 @@ import it.itc.sra.taom4e.model.core.informalcore.formalcore.FHardGoal;
 import it.itc.sra.taom4e.model.core.informalcore.formalcore.FPlan;
 import it.itc.sra.taom4e.model.core.informalcore.formalcore.FSoftGoal;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
+import br.unb.cic.rtgoretoprism.generator.goda.parser.GoalParser;
+import br.unb.cic.rtgoretoprism.generator.goda.parser.TaskParser;
 import br.unb.cic.rtgoretoprism.model.kl.Const;
 import br.unb.cic.rtgoretoprism.model.kl.ElementContainer;
 import br.unb.cic.rtgoretoprism.model.kl.GoalContainer;
@@ -127,6 +131,15 @@ public class AgentDefinition {
 	 * @return the (possibly) created goalcontainer
 	 */
 	public GoalContainer createGoal(FHardGoal goal, Const type) {
+		
+		//Goal parser
+		try {
+			GoalParser.parseRegex(goal.getName());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		GoalContainer gc = new GoalContainer(goal, type);
 		setRTAttributes(gc);
 		
@@ -148,6 +161,15 @@ public class AgentDefinition {
 	 * @return the (possibliy) created plancontainer
 	 */
 	public PlanContainer createPlan(FPlan p) {
+		
+		//Task parser
+		try {
+			TaskParser.parseRegex(p.getName());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		PlanContainer pc = new PlanContainer(p);
 		
 		setRTAttributes(pc);

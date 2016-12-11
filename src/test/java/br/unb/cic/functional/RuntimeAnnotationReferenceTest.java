@@ -21,9 +21,9 @@ public class RuntimeAnnotationReferenceTest {
 
 	@Test
 	public void TestCase23() {
-		String goalName = "G0:_dois_filhos_[G3;G1]";
-		String[] elementsName = {"G1:_folha_um", "1", "1",
-				"G2:_folha_dois", "2", "1"};
+		String goalName = "G0: two children [G3;G1]";
+		String[] elementsName = {"G1: leaf one", "1", "1",
+				"G2: leaf two", "2", "1"};
 
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -41,14 +41,15 @@ public class RuntimeAnnotationReferenceTest {
 			fail("No exception found.");	
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 
 	@Test
 	public void TestCase24() {
-		String goalName = "G0:_dois_filhos_[G3;G4]";
-		String[] elementsName = {"G1:_folha_um", "1", "1", 
-				"G2:_folha_dois", "2", "1"};
+		String goalName = "G0: two children [G3;G4]";
+		String[] elementsName = {"G1: leaf one", "1", "1", 
+				"G2: leaf two", "2", "1"};
 
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -66,6 +67,7 @@ public class RuntimeAnnotationReferenceTest {
 			fail("No exception found.");	
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 

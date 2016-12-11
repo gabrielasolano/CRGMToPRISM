@@ -20,9 +20,9 @@ public class ContextAnnotationValueTest {
 
 	@Test
 	public void TestCase34() {
-		String goalName = "G1:_anotação_de_contexto_incorreta";
-		String[] elementsName = {"T1:_folha", "1", "1"};
-		String contextAnnotation = "assertion condition OPERANDO != valor\n";
+		String goalName = "G1: invalid context annotation";
+		String[] elementsName = {"T1: leaf", "1", "1"};
+		String contextAnnotation = "assertion condition OPERAND != value\n";
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -41,14 +41,15 @@ public class ContextAnnotationValueTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	
 	@Test
 	public void TestCase35() {
-		String goalName = "G1:_anotação_de_contexto_incorreta";
-		String[] elementsName = {"T1:_folha", "1", "1"};
-		String contextAnnotation = "assertion condition OPERANDO >= A\n";
+		String goalName = "G1: invalid context annotation";
+		String[] elementsName = {"T1: task", "1", "1"};
+		String contextAnnotation = "assertion condition OPERAND >= A\n";
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -67,6 +68,7 @@ public class ContextAnnotationValueTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 

@@ -21,9 +21,9 @@ public class MultipleChildrenTest {
 	
 	@Test
 	public void TestCase11() {
-		String goalName = "G1:_dois_filhos";
-		String[] elementsName = {"G2:_folha_um", "1", "1", 
-				"G3:_folha_dois", "2", "1"};
+		String goalName = "G1: two children";
+		String[] elementsName = {"G2: leaf one", "1", "1", 
+				"G3: leaf two", "2", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -42,16 +42,17 @@ public class MultipleChildrenTest {
 						
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	
 	@Test
 	public void TestCase12() {
-		String goalName = "G0:_quatro_filhos";
-		String[] elementsName = {"G1:_folha_um", "1", "1",
-				"G2:_folha_dois", "2", "1",
-				"G3:_folha_três", "3", "1",
-				"G4:_folha_quatro", "4", "1"};
+		String goalName = "G0: four children";
+		String[] elementsName = {"G1: leaf one", "1", "1",
+				"G2: leaf two", "2", "1",
+				"G3: leaf three", "3", "1",
+				"G4: leaf four", "4", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -70,15 +71,16 @@ public class MultipleChildrenTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	
 	@Test
 	public void TestCase13() {
-		String goalName = "G1:_um_filho";
-		String[] elementsName = {"T1:_dois_filhos", "1", "1",
-				"T1.1:_folha_um", "1", "2",
-				"T1.2:_folha_dois", "2", "2"};
+		String goalName = "G1: one child";
+		String[] elementsName = {"T1: two children", "1", "1",
+				"T1.1: leaf one", "1", "2",
+				"T1.2: leaf twp", "2", "2"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -97,17 +99,18 @@ public class MultipleChildrenTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}					
 	}
 	
 	@Test
 	public void TestCase14() {
-		String goalName = "G1:_um_filho";
-		String[] elementsName = {"T1:_quatro_filhos", "1", "1",
-				"T1.1:_folha_um", "1", "2", 
-				"T1.2:_folha_dois", "2", "2",
-				"T1.3:_folha_três", "3", "2",
-				"T1.4:_folha_quatro", "4", "2"};
+		String goalName = "G1: one child";
+		String[] elementsName = {"T1: four children", "1", "1",
+				"T1.1: leaf one", "1", "2", 
+				"T1.2: leaf two", "2", "2",
+				"T1.3: leaf three", "3", "2",
+				"T1.4: leaf four", "4", "2"};
 	
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -126,6 +129,7 @@ public class MultipleChildrenTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}		
 	}
 

@@ -21,8 +21,8 @@ public class OneChildTest {
 	
 	@Test
 	public void TestCase9() {
-		String goalName = "G1:_um_filho)[try(T1)?skip:T2]";
-		String[] elementsName = {"T1:_filho_único", "1", "1"};
+		String goalName = "G1: one child [try(T1)?skip:T2]";
+		String[] elementsName = {"T1: one child", "1", "1"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -42,15 +42,16 @@ public class OneChildTest {
 
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 
 	@Test
 	public void TestCase10() {
 
-		String goalName = "G1:_um_erro_na_tarefa";
-		String[] elementsName = {"T1:_um_filho_[T1.1#T1.2]", "1", "1", 
-				"T1.1:_folha", "1", "2"};
+		String goalName = "G1: task error";
+		String[] elementsName = {"T1: one child [T1.1#T1.2]", "1", "1", 
+				"T1.1: leaf", "1", "2"};
 		
 		//Add elements to new register
 		InformationRegister[] info = new InformationRegister[elementsName.length/3];
@@ -68,6 +69,7 @@ public class OneChildTest {
 			fail("No exception found.");
 		}catch(Exception e){
 			assertNotNull(e);
+			e.printStackTrace();
 		}
 	}
 	

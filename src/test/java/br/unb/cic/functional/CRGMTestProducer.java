@@ -2,13 +2,16 @@ package br.unb.cic.functional;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
 import br.unb.cic.rtgoretoprism.generator.goda.parser.CtxParser;
+import br.unb.cic.rtgoretoprism.generator.goda.parser.GoalParser;
 import br.unb.cic.rtgoretoprism.generator.goda.parser.RTParser;
+import br.unb.cic.rtgoretoprism.generator.goda.parser.TaskParser;
 import br.unb.cic.rtgoretoprism.generator.kl.AgentDefinition;
 import br.unb.cic.rtgoretoprism.model.ctx.ContextCondition;
 import br.unb.cic.rtgoretoprism.model.ctx.CtxSymbols;
@@ -72,7 +75,7 @@ public class CRGMTestProducer{
 	}
 
 
-	public AgentDefinition generateCRGM(String goalId, InformationRegister[] info, String context) {
+	public AgentDefinition generateCRGM(String goalId, InformationRegister[] info, String context) throws IOException {
 
 		createActor();
 		agentDefinition = new AgentDefinition(actor);
@@ -85,7 +88,7 @@ public class CRGMTestProducer{
 		return agentDefinition;
 	}
 
-	private void addElement(RTContainer parent, InformationRegister[] info, int currentDepth) {
+	private void addElement(RTContainer parent, InformationRegister[] info, int currentDepth) throws IOException {
 
 		if(index == info.length)
 			return;
@@ -106,7 +109,7 @@ public class CRGMTestProducer{
 		}
 	}
 
-	private RTContainer createElement(RTContainer parent, int depth, int branch, String id) {
+	private RTContainer createElement(RTContainer parent, int depth, int branch, String id) throws IOException {
 		if(depth < MAX_GOALS_DEPTH){
 			return createGoal(parent, depth, branch, id, null);
 		}else{
@@ -115,6 +118,14 @@ public class CRGMTestProducer{
 	}
 
 	private GoalContainer createGoal(RTContainer parent, int depth, int branch, String id, String context) {
+		
+		try {
+			GoalParser.parseRegex(id);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		FHardGoal goal = formalFactory.createFHardGoal();
 		goal.setActor(actor);
 		goal.setName(id);
@@ -136,6 +147,14 @@ public class CRGMTestProducer{
 
 	@SuppressWarnings("unused")
 	public PlanContainer createPlan(RTContainer parent, String id, int depth, int branch, String context) {
+		
+		try {
+			TaskParser.parseRegex(id);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		FPlan plan = formalFactory.createFPlan();
 		plan.setActor(actor);
 		plan.setName(id);
@@ -239,7 +258,7 @@ public class CRGMTestProducer{
 	}
 
 	@SuppressWarnings("unchecked")
-	private void addPlan(PlanContainer pc, final AgentDefinition ad) throws IOException {
+	private void addPlan(PlanContainer pc, final AgentDefinition ad) throws Exception {
 
 		//Analyze labels
 		storeRegexResults(pc.getUid(), pc.getRtRegex());
@@ -273,7 +292,7 @@ public class CRGMTestProducer{
 		}
 	}
 
-	private void addCtxVar(List<ContextCondition> ctxs){
+	private void addCtxVar(List<ContextCondition> ctxs) throws Exception {
 		for(ContextCondition ctxCondition : ctxs)
 			ctxVars.put(ctxCondition.getVar(), ctxCondition.getOp() == CtxSymbols.BOOL ? "bool" : "double");
 	}
