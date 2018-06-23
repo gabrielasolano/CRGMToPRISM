@@ -139,6 +139,7 @@ public class PrismWriter {
 	private String intlCardPattern;
 	private String ctxGoalPattern;
 	private String ctxTaskPattern;
+	private String prevFailurePattern;
 
 	/** Has all the informations about the agent. */ 
 	private AgentDefinition ad;
@@ -262,6 +263,7 @@ public class PrismWriter {
 		intlCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_retry.pm");//TODO: create retry in a separate pattern
 		ctxGoalPattern	 				= ManageWriter.readFileAsString(input + "pattern_ctx_goal.pm");
 		ctxTaskPattern	 				= ManageWriter.readFileAsString(input + "pattern_ctx_task.pm");
+		prevFailurePattern	 			= ManageWriter.readFileAsString(input + "pattern_prev_failure.pm");
 
 		Collections.sort(rootGoals);
 
@@ -276,9 +278,8 @@ public class PrismWriter {
 				sbCtxVars.append(constOrParam + " " + ctxVars.get(ctx) + " " + ctx + ";\n");
 			planModules = planModules.append(sbCtxVars.toString());
 		}
+		cleanPlanModules();
 	}
-
-
 
 	/**
 	 * Writes the dispatch plans (with bodies) for every child goal
@@ -522,6 +523,8 @@ public class PrismWriter {
 			planModule = planModule.replace(CTX_EFFECT_TAG, "");
 			planModule = planModule.replace(CTX_CONDITION_TAG, "");
 		}
+		//Prev Failure Guard Condition
+		planModule = planModule.replace("$PREV_EFFECT$", buildPrevFailureFormula(prevFormula));
 		//Prev Success Guard Condition
 		planModule = planModule.replace("$PREV_SUCCESS$", buildPrevSuccessFormula(prevFormula));
 		//Time
@@ -746,6 +749,12 @@ public class PrismWriter {
 		StringBuilder sb = new StringBuilder("(" + prevFormula);
 		return sb.append(") & ").toString();
 	}
+	
+	private String buildPrevFailureFormula(String prevFormula) {
+		if (prevFormula == null)
+			return "";
+		return new String(this.prevFailurePattern);
+	}
 
 	/*	private void appendAlternativesToNoErrorFormula(PlanContainer plan) {
 		for(RTContainer altFirst : plan.getAlternatives().keySet()){
@@ -828,6 +837,14 @@ public class PrismWriter {
 		evalBash = evalBash.replace(REPLACE_BASH_TAG, evalFormulaReplace);
 
 		ManageWriter.printModel(pw, evalBash);
+	}
+
+	/*Remove multiple line breaks*/
+	private void cleanPlanModules() {
+		String planModule = planModules.toString();
+		planModules = planModules.delete(0, planModules.length()-1);
+		planModule = planModule.replaceAll("[\r\n]{6}", "\r\n");
+		planModules = planModules.append(planModule);
 	}
 
 	/**
