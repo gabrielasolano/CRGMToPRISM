@@ -1,1 +1,1 @@
-$CONST_PARAM$ int XOR_$GID$;
+$CONST_PARAM$ int $XOR_CTX$_$GID$;
