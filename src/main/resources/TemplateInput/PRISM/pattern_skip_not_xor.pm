@@ -1,1 +1,1 @@
-XOR_$GID$
+$XOR_CTX$_$GID$

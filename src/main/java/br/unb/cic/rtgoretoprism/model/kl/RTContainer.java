@@ -156,6 +156,29 @@ public abstract class RTContainer extends ElementContainer implements Comparable
 				return dec;
 		return null;
 	}
+
+	/**
+	 * @return Returns a list of decomposed leaf tasks
+	 */
+	public LinkedList<RTContainer> getDecompLeafTask(RTContainer node){
+		LinkedList<RTContainer> leafTasks = new LinkedList<RTContainer>();
+		
+		if (!node.getDecompGoals().isEmpty()) {
+			for (GoalContainer goal : node.getDecompGoals()) {
+				leafTasks.addAll(getDecompLeafTask(goal));
+			}
+		}
+		else if (!node.getDecompPlans().isEmpty()) {
+			for (PlanContainer plan : node.getDecompPlans()) {
+				leafTasks.addAll(getDecompLeafTask(plan));
+			}
+		}
+		else {
+			leafTasks.add(node); 
+		}
+		
+		return leafTasks;
+	}
 	
 	/**
 	 * Returns the name of the goal without the RTRegex
