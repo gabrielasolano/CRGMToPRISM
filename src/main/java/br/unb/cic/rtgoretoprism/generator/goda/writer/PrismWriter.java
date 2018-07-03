@@ -139,6 +139,7 @@ public class PrismWriter {
 	private String intlCardPattern;
 	private String ctxGoalPattern;
 	private String ctxTaskPattern;
+	private String prevFailurePattern;
 
 	/** Has all the informations about the agent. */ 
 	private AgentDefinition ad;
@@ -261,6 +262,7 @@ public class PrismWriter {
 		intlCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_retry.pm");//TODO: create retry in a separate pattern
 		ctxGoalPattern	 				= ManageWriter.readFileAsString(input + "pattern_ctx_goal.pm");
 		ctxTaskPattern	 				= ManageWriter.readFileAsString(input + "pattern_ctx_task.pm");
+		prevFailurePattern	 			= ManageWriter.readFileAsString(input + "pattern_prev_failure.pm");
 
 		Collections.sort(rootGoals);
 
@@ -275,6 +277,7 @@ public class PrismWriter {
 				sbCtxVars.append(constOrParam + " " + ctxVars.get(ctx) + " " + ctx + ";\n");
 			planModules = planModules.append(sbCtxVars.toString());
 		}
+		cleanPlanModules();
 	}
 
 
@@ -511,6 +514,8 @@ public class PrismWriter {
 			planModule = planModule.replace(CTX_EFFECT_TAG, "");
 			planModule = planModule.replace(CTX_CONDITION_TAG, "");
 		}
+		//Prev Failure Guard Condition
+		planModule = planModule.replace("$PREV_EFFECT$", buildPrevFailureFormula(prevFormula));
 		//Prev Success Guard Condition
 		planModule = planModule.replace("$PREV_SUCCESS$", buildPrevSuccessFormula(prevFormula));
 		//Time
@@ -711,11 +716,6 @@ public class PrismWriter {
 
 		sb.replace(sb.lastIndexOf(" & "), sb.length(), "");
 		return sb.toString();
-
-		/* sb.insert(0, "(");
-		 * sb.replace(sb.lastIndexOf(" & "), sb.length(), ")");
-		 * return sb.toString() +
-				buildContextSuccessFormula(plan);*/
 	}
 
 	private String buildContextSuccessFormula(RTContainer plan) throws IOException{
@@ -736,6 +736,12 @@ public class PrismWriter {
 			return "";
 		StringBuilder sb = new StringBuilder("(" + prevFormula);
 		return sb.append(") & ").toString();
+	}
+	
+	private String buildPrevFailureFormula(String prevFormula) {
+		if (prevFormula == null)
+			return "";
+		return new String(this.prevFailurePattern);
 	}
 
 	/*	private void appendAlternativesToNoErrorFormula(PlanContainer plan) {
@@ -819,6 +825,14 @@ public class PrismWriter {
 		evalBash = evalBash.replace(REPLACE_BASH_TAG, evalFormulaReplace);
 
 		ManageWriter.printModel(pw, evalBash);
+	}
+	
+	/*Remove multiple line breaks*/
+	private void cleanPlanModules() {
+		String planModule = planModules.toString();
+		planModules = planModules.delete(0, planModules.length()-1);		
+		planModule = planModule.replaceAll("[\t\r\n][\t\r\n]+[\n]+", "\n\n");
+		planModules = planModules.append(planModule);
 	}
 
 	/**
