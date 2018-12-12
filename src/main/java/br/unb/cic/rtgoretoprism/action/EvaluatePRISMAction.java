@@ -145,7 +145,7 @@ public class EvaluatePRISMAction extends AbstractCodeGeneractionAction {
 	        try {
 	        	agentName = "EvaluationActor";
 	        	String cmd = "./prism";
-				String arg1 = agentName + ".pm";
+				String arg1 = agentName + ".nm";
 				String arg2 = "reachability.pctl";
 				
 				MessageConsole myConsole = ConsoleUtil.findConsole( agentName );

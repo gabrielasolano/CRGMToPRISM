@@ -74,7 +74,6 @@ public class PrismWriter {
 	private static final String TIME_SLOT_TAG			= "$TIME_SLOT";
 	private static final String PREV_TIME_SLOT_TAG		= "$PREV_TIME_SLOT";
 	private static final String GID_TAG					= "$GID$";
-	private static final String DEFAULT_VAL				= "$DEFAULT_VAL$";
 	private static final String PREV_GID_TAG			= "$PREV_GID$";
 	private static final String GOAL_MODULES_TAG 		= "$GOAL_MODULES$";
 	private static final String SKIPPED_TAG				= "$SKIPPED$";
@@ -135,6 +134,9 @@ public class PrismWriter {
 	private String tryFDecPattern;
 	private String optDecPattern;
 	private String optHeaderPattern;
+	private String ctxHeaderPattern;
+	private String ctxPattern;
+	private String andMDPPattern;
 	private String seqCardPattern;
 	private String intlCardPattern;
 	private String ctxGoalPattern;
@@ -189,8 +191,8 @@ public class PrismWriter {
 
 		//read some of the used template
 
-		header = ManageWriter.readFileAsString( prismInputFolder + "modelheader.pm" );
-		body = ManageWriter.readFileAsString( prismInputFolder + "modelbody.pm" );
+		header = ManageWriter.readFileAsString( prismInputFolder + "modelheader.nm" );
+		body = ManageWriter.readFileAsString( prismInputFolder + "modelbody.nm" );
 		evalBash = ManageWriter.readFileAsString( prismInputFolder + "eval_formula.sh" );
 		//footer = readFileAsString( planInputFolder + "agentfooter.xml" );
 
@@ -205,7 +207,7 @@ public class PrismWriter {
 		writeAnOutputDir( agentOutputFolder );
 		//create the output PRISM file */
 
-		PrintWriter modelFile = ManageWriter.createFile(ad.getAgentName() + ".pm", agentOutputFolder);
+		PrintWriter modelFile = ManageWriter.createFile(ad.getAgentName() + ".nm", agentOutputFolder);
 		PrintWriter evalBashFile = ManageWriter.createFile("eval_formula.sh", agentOutputFolder);
 
 		//Reads all softgoals from the softgoals list and writes them into the belief base.
@@ -249,21 +251,24 @@ public class PrismWriter {
 	private void writePrismModel( String input, LinkedList<GoalContainer> rootGoals, 
 			String planOutputFolder, String pkgName, String utilPkgName, String planPkgName ) throws CodeGenerationException, IOException {
 
-		leafGoalPattern 				= ManageWriter.readFileAsString(input + "pattern_leafgoal.pm");
-		andDecPattern 					= ManageWriter.readFileAsString(input + "pattern_and.pm");
-		xorDecPattern 					= ManageWriter.readFileAsString(input + "pattern_xor.pm");
-		xorDecHeaderPattern 			= ManageWriter.readFileAsString(input + "pattern_xor_header.pm");
-		xorNotSkippedPattern	 		= ManageWriter.readFileAsString(input + "pattern_skip_not_xor.pm");
-		seqRenamePattern				= ManageWriter.readFileAsString(input + "pattern_seq_rename.pm");
-		trySDecPattern	 				= ManageWriter.readFileAsString(input + "pattern_try_success.pm");
-		tryFDecPattern	 				= ManageWriter.readFileAsString(input + "pattern_try_fail.pm");
-		optDecPattern 					= ManageWriter.readFileAsString(input + "pattern_opt.pm");
-		optHeaderPattern	 			= ManageWriter.readFileAsString(input + "pattern_opt_header.pm");
-		seqCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_seq.pm");
-		intlCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_retry.pm");//TODO: create retry in a separate pattern
-		ctxGoalPattern	 				= ManageWriter.readFileAsString(input + "pattern_ctx_goal.pm");
-		ctxTaskPattern	 				= ManageWriter.readFileAsString(input + "pattern_ctx_task.pm");
-		prevFailurePattern	 			= ManageWriter.readFileAsString(input + "pattern_prev_failure.pm");
+		leafGoalPattern 				= ManageWriter.readFileAsString(input + "pattern_leafgoal.nm");
+		andDecPattern 					= ManageWriter.readFileAsString(input + "pattern_and.nm");
+		xorDecPattern 					= ManageWriter.readFileAsString(input + "pattern_xor.nm");
+		xorDecHeaderPattern 			= ManageWriter.readFileAsString(input + "pattern_xor_header.nm");
+		xorNotSkippedPattern	 		= ManageWriter.readFileAsString(input + "pattern_skip_not_xor.nm");
+		seqRenamePattern				= ManageWriter.readFileAsString(input + "pattern_seq_rename.nm");
+		trySDecPattern	 				= ManageWriter.readFileAsString(input + "pattern_try_success.nm");
+		tryFDecPattern	 				= ManageWriter.readFileAsString(input + "pattern_try_fail.nm");
+		optDecPattern 					= ManageWriter.readFileAsString(input + "pattern_opt.nm");
+		optHeaderPattern	 			= ManageWriter.readFileAsString(input + "pattern_opt_header.nm");
+		ctxHeaderPattern				= ManageWriter.readFileAsString(input + "pattern_ctx_header.nm");
+		ctxPattern						= ManageWriter.readFileAsString(input + "pattern_ctx.nm");
+		andMDPPattern					= ManageWriter.readFileAsString(input + "pattern_and_MDP.nm");
+		seqCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_seq.nm");
+		intlCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_retry.nm");//TODO: create retry in a separate pattern
+		ctxGoalPattern	 				= ManageWriter.readFileAsString(input + "pattern_ctx_goal.nm");
+		ctxTaskPattern	 				= ManageWriter.readFileAsString(input + "pattern_ctx_task.nm");
+		prevFailurePattern	 			= ManageWriter.readFileAsString(input + "pattern_prev_failure.nm");
 
 		Collections.sort(rootGoals);
 
@@ -272,11 +277,6 @@ public class PrismWriter {
 					root, 
 					leafGoalPattern,							
 					null);
-
-			StringBuilder sbCtxVars = new StringBuilder();
-			for(String ctx : ctxVars.keySet())
-				sbCtxVars.append(constOrParam + " " + ctxVars.get(ctx) + " " + ctx + ";\n");
-			planModules = planModules.append(sbCtxVars.toString());
 		}
 		cleanPlanModules();
 	}
@@ -352,11 +352,22 @@ public class PrismWriter {
 				trySDecPattern = new String(this.trySDecPattern),
 				tryFDecPattern = new String(this.tryFDecPattern),
 				optHeaderPattern = new String(this.optHeaderPattern),
-				optDecPattern = new String(this.optDecPattern);		
+				optDecPattern = new String(this.optDecPattern),
+				ctxHeaderPattern = new String(this.ctxHeaderPattern),
+				ctxPattern = new String(this.ctxPattern),
+				andMDPPattern = new String(this.andMDPPattern);		
 
 		PlanContainer plan = (PlanContainer) root;
 		String planModule;
 		StringBuilder planFormula = new StringBuilder();
+		
+		boolean contextPresent = false;
+		
+		if(constOrParam.equals("const") &&
+				(!plan.getFulfillmentConditions().isEmpty() ||
+						!plan.getAdoptionConditions().isEmpty())){
+			contextPresent = true;
+		}
 
 		if(plan.getCardNumber() > 1){
 			StringBuilder seqRenames = new StringBuilder();
@@ -483,8 +494,24 @@ public class PrismWriter {
 				processPlanFormula(plan, planFormula,Const.OPT);
 			}
 		}else{
-			//And/OR			
-			sbType.append(andDecPattern + "\n\n");
+			//And/OR
+			
+			/** GABRIELA 12/12/18 
+			 * 1. Verifica se tem contexto envolvido, se sim, append of template com contexto. Se não, append o template normal. 
+			 * 2. Se tiver contexto, tem que declarar (com comentário)
+			 * 3. Não precisa mais de ctx_effect, ctx_condition, prev_formula
+			 * 
+			 **/
+			
+			if(contextPresent){
+				String comment = new String(ctxHeaderPattern);
+				comment = commentContextInformation((RTContainer) plan, "CTX", comment);
+				sbHeader.append(comment);
+				sbType.append(ctxPattern + "\n\n");
+			}
+			else {
+				sbType.append(andMDPPattern + "\n\n");
+			}
 			noErrorFormula += " & s" + plan.getClearElId() + " < 4";
 			processPlanFormula(plan, planFormula, plan.getRoot().getDecomposition());
 		}
@@ -496,9 +523,7 @@ public class PrismWriter {
 		//Type
 		planModule = planModule.replace(DEC_TYPE_TAG, sbType.toString());
 		//CONTEXT CONDITION
-		if(constOrParam.equals("const") &&
-				(!plan.getFulfillmentConditions().isEmpty() ||
-						!plan.getAdoptionConditions().isEmpty())){
+		if(contextPresent){
 
 			List<StringBuilder> contextsInfo = getContextsInfo(plan);
 
@@ -540,11 +565,6 @@ public class PrismWriter {
 		//GID
 		//planModule = planModule.replace(GID_TAG, plan.getClearElId());
 		planModule = planModule.replace(GID_TAG, plan.getClearElId());
-		//DEFAULT VALUE FOR RELIABILITY
-		if(constOrParam.equals("const"))
-			planModule = planModule.replace(DEFAULT_VAL, "=0.99");
-		else
-			planModule = planModule.replace(DEFAULT_VAL, "");
 		//CONST OR PARAM
 		planModule = planModule.replace(CONST_PARAM_TAG, constOrParam);
 		//MAX RETRIES
@@ -654,7 +674,7 @@ public class PrismWriter {
 		case TRY_S: break;
 		case TRY_F: break;
 		case OPT: planFormula.append(buildOptFormula(plan, planFormula));break;					  
-		default: planFormula.append(op + "(s" + plan.getClearElId() + "=2)");
+		default: planFormula.append(op + "(s" + plan.getClearElId() + "=2)" + buildContextSuccessFormula(plan));
 		}
 	}
 
@@ -733,13 +753,18 @@ public class PrismWriter {
 	private String buildContextSuccessFormula(RTContainer plan) throws IOException{
 
 		if(this.constOrParam.equals("param"))
-			return "";
-
+			return "";	
+		
 		StringBuilder sb = new StringBuilder();		
-		for(String ctxCondition : plan.getFulfillmentConditions())
-			sb.append(sb.length() > 0 ? " | " : "(").append("!(" + CtxParser.parseRegex(ctxCondition)[1] + ")");
+		for(String ctxCondition : plan.getFulfillmentConditions()) {
+			Object [] parsedCtxs = CtxParser.parseRegex(ctxCondition);
+			if((CtxSymbols)parsedCtxs[2] == CtxSymbols.COND){
+				//sb.append(sb.length() > 0 ? " | " : "(").append("!(" + CtxParser.parseRegex(ctxCondition)[1] + ")");
+				sb.append(sb.length() > 0 ? " | " : "").append("CTX_" + plan.getClearElId() + "=0");
+			}
+		}
 		if(sb.length() > 0)
-			sb.insert(0, " | (s" + plan.getClearElId() + "=3 & ").append("))");
+			sb.insert(0, " | (s" + plan.getClearElId() + "=3 & ").append(")");
 		return sb.toString();
 	}
 
