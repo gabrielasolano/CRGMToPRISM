@@ -117,6 +117,7 @@ public class PrismWriter {
 	private String ctxSkipPattern;
 	private String seqCardPattern;
 	private String intlCardPattern;
+	private String rtryCardPattern;
 	private String ctxTrySPattern;
 	private String ctxTryFPattern;
 
@@ -210,7 +211,8 @@ public class PrismWriter {
 		ctxSkipPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_skip.nm");
 		ctxFailPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_fail.nm");
 		seqCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_seq.nm");
-		intlCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_retry.nm");//TODO: create retry in a separate pattern
+		intlCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_intl.nm");//TODO: create retry in a separate pattern
+		rtryCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_retry.nm");//TODO: create retry in a separate pattern
 		ctxTrySPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_try_success.nm");
 		ctxTryFPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_try_fail.nm");
 
@@ -289,6 +291,7 @@ public class PrismWriter {
 
 		String seqCardPattern = new String(this.seqCardPattern),
 				intlCardPattern = new String(this.intlCardPattern),
+				rtryCardPattern = new String(this.rtryCardPattern),
 				andDecPattern = new String(this.andDecPattern),
 				xorDecPattern = new String(this.xorDecPattern),
 				xorDecHeaderPattern = new String(this.xorDecHeaderPattern),
@@ -323,7 +326,10 @@ public class PrismWriter {
 				}
 				seqCardPattern = seqCardPattern.replace("$SEQ_RENAMES$", seqRenames);
 				planModule = seqCardPattern.replace(MODULE_NAME_TAG, plan.getClearElName());
-			}else{
+			}else if (plan.getCardType() == Const.RTRY){
+				planModule = rtryCardPattern.replace(MODULE_NAME_TAG, plan.getClearElName());
+			}
+			else{
 				for(int i = 2; i <= plan.getCardNumber(); i++){
 					String seqRename = new String(seqRenamePattern);
 					seqRename = seqRename.replace(CARD_N_TAG, i + "");
@@ -599,7 +605,7 @@ public class PrismWriter {
 	private String buildTrySuccessFailureFormula(RTContainer plan, StringBuilder planFormula, Const decType, boolean inv) throws IOException{
 		switch(decType){
 		case TRY_S: return  plan != null ? "s" + plan.getClearElId() + "=" + (!inv ? "2" : "3") : (!inv ? "true" : "true");
-		case TRY_F: return  plan != null ? "s" + plan.getClearElId() + "=2" : "false";
+		case TRY_F: return  plan != null ? "s" + plan.getClearElId() + "=2" : "true";
 		default: return "";
 		}		
 	}
