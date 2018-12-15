@@ -304,11 +304,18 @@ public class PrismWriter {
 		StringBuilder planFormula = new StringBuilder();
 
 		boolean contextPresent = false;
+		boolean goalContext = false;
 
 		if(constOrParam.equals("const") &&
 				(!plan.getFulfillmentConditions().isEmpty() ||
 						!plan.getAdoptionConditions().isEmpty())){
+			
 			contextPresent = true;
+			
+			for (String ctxCondition : plan.getFulfillmentConditions()){
+				Object [] parsedCtxs = CtxParser.parseRegex(ctxCondition);
+				if ((CtxSymbols) parsedCtxs[2] == CtxSymbols.COND) goalContext = true; 
+			}
 		}
 
 		if(plan.getCardNumber() > 1){
@@ -442,7 +449,8 @@ public class PrismWriter {
 			//And/OR
 			if(contextPresent){
 				sbHeader.append(getContextHeader(plan));
-				sbType.append(ctxSkipPattern);
+				if (goalContext) sbType.append(ctxSkipPattern);
+				else sbType.append(ctxFailPattern);
 			}
 			else {
 				sbType.append(andDecPattern);
