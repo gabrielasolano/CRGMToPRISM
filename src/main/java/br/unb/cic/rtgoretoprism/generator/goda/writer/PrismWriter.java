@@ -126,8 +126,6 @@ public class PrismWriter {
 	/** the list of plan that are root for a capability of the selected agent */
 	private List<Plan> capabilityPlanList;
 
-	private Map<String, String> ctxVars;
-
 	/**
 	 * Creates a new AgentWriter instance
 	 * 
@@ -148,8 +146,6 @@ public class PrismWriter {
 		this.basicAgentPackage = PathLocation.BASIC_AGENT_PACKAGE_PREFIX + ad.getAgentName();
 
 		this.constOrParam = parametric ? "param" : "const";
-
-		this.ctxVars = new TreeMap<String, String>();
 	}
 
 	/**	private List<Plan> capabilityPlanList;
@@ -211,8 +207,8 @@ public class PrismWriter {
 		ctxSkipPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_skip.nm");
 		ctxFailPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_fail.nm");
 		seqCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_seq.nm");
-		intlCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_intl.nm");//TODO: create retry in a separate pattern
-		rtryCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_retry.nm");//TODO: create retry in a separate pattern
+		intlCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_intl.nm");
+		rtryCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_retry.nm");
 		ctxTrySPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_try_success.nm");
 		ctxTryFPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_try_fail.nm");
 
@@ -224,7 +220,6 @@ public class PrismWriter {
 					leafGoalPattern,							
 					null);
 		}
-		//cleanPlanModules();//TODO: is this really necessary?
 	}
 
 	/**
@@ -259,7 +254,7 @@ public class PrismWriter {
 			if(prevGoalFormula != null)
 				goalFormula.replace(goalFormula.lastIndexOf(operator), goalFormula.length(), "");
 			if(root.isIncluded())
-				planModules = planModules.append("\nformula " + root.getClearElId() + " = " + goalFormula + ";\n");
+				planModules = planModules.append("formula " + root.getClearElId() + " = " + goalFormula + ";\n\n");
 			return new String [] {root.getClearElId(), goalFormula.toString()};
 		}else if(!root.getDecompPlans().isEmpty()){
 			StringBuilder taskFormula = new StringBuilder();
@@ -273,7 +268,7 @@ public class PrismWriter {
 			if(taskFormula.length() > 0)
 				taskFormula.replace(taskFormula.lastIndexOf(operator), taskFormula.length(), "");
 			if(root instanceof GoalContainer)
-				planModules = planModules.append("\nformula " + root.getClearElId() + " = " + taskFormula + ";\n");
+				planModules = planModules.append("formula " + root.getClearElId() + " = " + taskFormula + ";\n\n");
 			return new String [] {root.getClearElId(), taskFormula.toString()};
 		}else if(root instanceof PlanContainer){
 			return writePrismModule(root, pattern, prevFormula);
@@ -447,16 +442,16 @@ public class PrismWriter {
 			//And/OR
 			if(contextPresent){
 				sbHeader.append(getContextHeader(plan));
-				sbType.append(ctxSkipPattern + "\n\n");
+				sbType.append(ctxSkipPattern);
 			}
 			else {
-				sbType.append(andDecPattern + "\n\n");
+				sbType.append(andDecPattern);
 			}
 			processPlanFormula(plan, planFormula, plan.getRoot().getDecomposition());
 		}
 		
 		//Header
-		planModule = planModule.replace(DEC_HEADER_TAG, sbHeader.toString() + "\n");
+		planModule = planModule.replace(DEC_HEADER_TAG, sbHeader.toString());
 		//Type
 		planModule = planModule.replace(DEC_TYPE_TAG, sbType.toString());
 
@@ -478,7 +473,7 @@ public class PrismWriter {
 		//MAX RETRIES
 		planModule = planModule.replace(MAX_TRIES_TAG, plan.getCardNumber() + 1 + "");				
 		planModule = planModule.replace(MAX_RETRIES_TAG, plan.getCardNumber() + "");
-		planModules = planModules.append(planModule);				
+		planModules = planModules.append(planModule+"\n");				
 		return new String[]{plan.getClearElId(), planFormula.toString()};
 	}
 
@@ -498,38 +493,23 @@ public class PrismWriter {
 	 *  [1] : adoptionCondition
 	 *  //[2] : ctxEffect 
 	 */
-	private List<StringBuilder> getContextsInfo(RTContainer altFirst) throws ParseCancellationException, IOException {
+	private StringBuilder getContextsInfo(RTContainer altFirst) throws ParseCancellationException, IOException {
 
-		StringBuilder fulfillmentCondition = new StringBuilder(),
-				adoptionCondition = new StringBuilder();
+		StringBuilder fullContextCondition = new StringBuilder();
 
 		if(!altFirst.getFulfillmentConditions().isEmpty()){				
 			for(String ctxCondition : altFirst.getFulfillmentConditions()){
 				Object [] parsedCtxs = CtxParser.parseRegex(ctxCondition);
-
-				if (!altFirst.isAlternative()) addCtxVar((List<ContextCondition>)parsedCtxs[0]);
-
-				if((CtxSymbols)parsedCtxs[2] == CtxSymbols.COND){							
-					fulfillmentCondition.append(fulfillmentCondition.length() > 0 ? " & " : "")
-					.append(parsedCtxs[1]);
-				}else{
-					adoptionCondition.append(adoptionCondition.length() > 0 ? " & " : "")
-					.append(parsedCtxs[1]);
-				}
+				fullContextCondition.append(fullContextCondition.length() > 0 ? " & " : "").append(parsedCtxs[1]);
 			}		
 		}
-
-		List<StringBuilder> ctxInformation = new ArrayList<StringBuilder>();
-		ctxInformation.add(0, fulfillmentCondition);
-		ctxInformation.add(1, adoptionCondition);
-
-		return ctxInformation;
+		return fullContextCondition;
 	}
 
 	private String commentContextInformation(RTContainer altFirst, String xorVar) throws ParseCancellationException, IOException {
-		List<StringBuilder> contextInformation = getContextsInfo(altFirst);
+		StringBuilder contextInformation = getContextsInfo(altFirst);
 		xorVar = xorVar.substring(0, xorVar.length() - 2);
-		xorVar += " //" + contextInformation.get(0).append(contextInformation.get(1)).toString() + "\n";
+		xorVar += " //" + contextInformation.toString() + "\n";
 		return xorVar;
 	}
 
@@ -544,20 +524,6 @@ public class PrismWriter {
 
 		if (alt.equals(root)) return true;
 		return false;
-	}
-
-	private void addCtxVar(List<ContextCondition> ctxs){
-		String type;
-		for(ContextCondition ctxCondition : ctxs){
-			if(ctxCondition.getType() == CtxSymbols.BOOL){
-				type = "bool";
-			}else if(ctxCondition.getType() == CtxSymbols.DOUBLE){
-				type = "double";
-			}else{
-				type = "int";
-			}
-			ctxVars.put(ctxCondition.getVar(), type);
-		}
 	}
 
 	private void processPlanFormula(PlanContainer plan, StringBuilder planFormula, Const decType) throws IOException{
@@ -685,13 +651,5 @@ public class PrismWriter {
 
 		String model = header + "\n" + body;
 		ManageWriter.printModel(adf, model);
-	}
-
-	/*Remove multiple line breaks*/
-	private void cleanPlanModules() {
-		String planModule = planModules.toString();
-		planModules = planModules.delete(0, planModules.length()-1);
-		planModule = planModule.replaceAll("[\r\n]{6}", "\r\n");
-		planModules = planModules.append(planModule);
 	}
 }
