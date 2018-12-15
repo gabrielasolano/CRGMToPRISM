@@ -43,6 +43,8 @@ public class PlanContainer extends RTContainer{
 	//the list of means_end goal (where this plan is a means to reach them.)
 	private ArrayList<GoalContainer> meGoals;
 	private ArrayList<PlanContainer> parentlist;
+	private String costRegex;
+	private String costValue;
 	
 	/**
 	 * Creates a new PlanContainer instance
@@ -123,6 +125,7 @@ public class PlanContainer extends RTContainer{
 	@Override
 	public String getClearElName(){
 		String rtRegex = getRtRegex() != null ? getRtRegex() : "";
+		String costRegex = getCostRegex() != null ? getCostRegex() : "";
 		StringBuilder sb = new StringBuilder(getUid() + '_');
 		for(String word : getName().split("_")){
 			if(word.isEmpty())
@@ -131,11 +134,30 @@ public class PlanContainer extends RTContainer{
 			sbb.setCharAt(0, Character.toUpperCase(word.charAt(0)));
 			sb.append(sbb);
 		}
+		if (costRegex != "") {
+			return sb.toString().replaceAll("[:\\.-]", "_").replace("[" + costRegex.replace(".", "_") + "]", "");
+		}
 		return sb.toString().replaceAll("[:\\.-]", "_").replace("[" + rtRegex.replace(".", "_") + "]", "");
 	}
 	
 	public void setRoot(RTContainer root){
 		super.setRoot(root);
 		setUid(root.getUid());
+	}
+
+	public String getCostRegex() {
+		return costRegex;
+	}
+
+	public void setCostRegex(String costRegex) {
+		this.costRegex = costRegex;
+	}
+
+	public String getCostValue() {
+		return costValue;
+	}
+
+	public void setCostValue(String costValue) {
+		this.costValue = costValue;
 	}
 }

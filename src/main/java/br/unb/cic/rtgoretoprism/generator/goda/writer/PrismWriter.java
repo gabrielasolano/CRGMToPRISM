@@ -80,6 +80,8 @@ public class PrismWriter {
 	private static final String MAX_RETRIES_TAG	 		= "$MAX_RETRIES$";
 	private static final String CARD_N_TAG		 		= "$CARD_N$";
 	private static final String XOR_CTX_TAG				= "$XOR_CTX$";
+	private static final String REWARD_TAG				= "$REWARD_STRUCTURE$";
+	private static final String COST_VALUE_TAG			= "$COST$";
 	private static final String CONST_PARAM_TAG			= "$CONST_PARAM$";
 
 	private final String constOrParam;
@@ -98,8 +100,9 @@ public class PrismWriter {
 	private String basicAgentPackage;
 
 	// Strings that contain the parts of the ADF skeleton, read from file
-	private String header, body;
+	private String header, body, reward;
 	private StringBuilder planModules = new StringBuilder();
+	private StringBuilder rewardModule = new StringBuilder();
 
 	/** PRISM patterns */
 	private String leafGoalPattern;
@@ -120,6 +123,7 @@ public class PrismWriter {
 	private String rtryCardPattern;
 	private String ctxTrySPattern;
 	private String ctxTryFPattern;
+	private String rewardPattern;
 
 	/** Has all the informations about the agent. */ 
 	private AgentDefinition ad;
@@ -165,6 +169,7 @@ public class PrismWriter {
 
 		header = ManageWriter.readFileAsString( prismInputFolder + "modelheader.nm" );
 		body = ManageWriter.readFileAsString( prismInputFolder + "modelbody.nm" );
+		reward = ManageWriter.readFileAsString( prismInputFolder + "modelreward.nm" );
 
 		//create the model output dir
 		writeAnOutputDir( agentOutputFolder );
@@ -209,6 +214,7 @@ public class PrismWriter {
 		seqCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_seq.nm");
 		intlCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_intl.nm");
 		rtryCardPattern	 				= ManageWriter.readFileAsString(input + "pattern_card_retry.nm");
+		rewardPattern					= ManageWriter.readFileAsString(input + "pattern_reward.nm");
 		ctxTrySPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_try_success.nm");
 		ctxTryFPattern					= ManageWriter.readFileAsString(input + "pattern_ctx_try_fail.nm");
 
@@ -271,10 +277,21 @@ public class PrismWriter {
 				planModules = planModules.append("formula " + root.getClearElId() + " = " + taskFormula + ";\n\n");
 			return new String [] {root.getClearElId(), taskFormula.toString()};
 		}else if(root instanceof PlanContainer){
+			writeRewardModule(root);
 			return writePrismModule(root, pattern, prevFormula);
 		}
 
 		return new String[]{"",""};
+	}
+
+	private void writeRewardModule(RTContainer root) {
+		PlanContainer plan = (PlanContainer) root;
+		if (plan.getCostRegex() != null) {
+			String rewardPattern = new String(this.rewardPattern);
+			rewardPattern = rewardPattern.replace(GID_TAG, plan.getClearElId());
+			rewardPattern = rewardPattern.replace(COST_VALUE_TAG, plan.getCostValue());
+			rewardModule = rewardModule.append(rewardPattern);
+		}
 	}
 
 	private String[] writePrismModule(
@@ -656,8 +673,9 @@ public class PrismWriter {
 	private void printModel( PrintWriter adf ) {
 	
 		body = body.replace(GOAL_MODULES_TAG, planModules);
+		reward = reward.replace(REWARD_TAG, rewardModule);
 
-		String model = header + "\n" + body;
+		String model = header + "\n" + body + reward;
 		ManageWriter.printModel(adf, model);
 	}
 }

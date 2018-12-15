@@ -52,6 +52,7 @@ import java.util.TreeMap;
 
 import br.unb.cic.rtgoretoprism.console.ATCConsole;
 import br.unb.cic.rtgoretoprism.generator.CodeGenerationException;
+import br.unb.cic.rtgoretoprism.generator.goda.parser.CostParser;
 import br.unb.cic.rtgoretoprism.generator.goda.parser.RTParser;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.PrismWriter;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.dtmc.DTMCWriter;
@@ -324,10 +325,18 @@ public class RTGoreProducer {
 	private void addPlan(Plan p, PlanContainer pc, final AgentDefinition ad) throws IOException {
 		addContributions(p, pc, ad);
 		
+		
 		//Integer prevPath = pc.getPrevTimePath();
 		//Integer rootPath = pc.getTimePath();
 		//Integer rootTime = pc.getTimeSlot();
-		storeRegexResults(pc.getUid(), pc.getRtRegex(), pc.getDecomposition());
+		if (tn.hasDecomposition(p)){
+			storeRegexResults(pc.getUid(), pc.getRtRegex(), pc.getDecomposition());
+		}
+		else {
+			pc.setCostRegex(pc.getRtRegex());
+			pc.setRtRegex(null);
+			storeCostResults(pc);
+		}
 
 		if (tn.isMeansEndDec(p)){
 			List<FPlan> melist = tn.getMeansEndMeanPlans(p);
@@ -354,7 +363,7 @@ public class RTGoreProducer {
 		}
 
 	}
-	
+
 	private void iteratePlans(AgentDefinition ad, PlanContainer pc, List<FPlan> decList) throws IOException{
 		
 		Integer prevPath = pc.getPrevTimePath();
@@ -602,6 +611,13 @@ public class RTGoreProducer {
 			rtAltGoals.putAll((Map<String, Set<String>>) res [2]);
 			rtTryGoals.putAll((Map<String, String[]>) res [3]);
 			rtOptGoals.putAll((Map<String, Boolean>) res[4]);
+		}
+	}
+	
+	private void storeCostResults(PlanContainer pc) throws IOException {
+		if (pc.getCostRegex() != null) {
+			Object [] res = CostParser.parseRegex(pc.getCostRegex());
+			pc.setCostValue((String) res[0]);	
 		}
 	}
 	
