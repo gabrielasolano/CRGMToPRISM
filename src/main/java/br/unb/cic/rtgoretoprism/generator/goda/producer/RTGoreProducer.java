@@ -617,7 +617,8 @@ public class RTGoreProducer {
 	private void storeCostResults(PlanContainer pc) throws IOException {
 		if (pc.getCostRegex() != null) {
 			Object [] res = CostParser.parseRegex(pc.getCostRegex());
-			pc.setCostValue((String) res[0]);	
+			pc.setCostValue((String) res[0]);
+			pc.setCostVariable((String) res[1]);
 		}
 	}
 	

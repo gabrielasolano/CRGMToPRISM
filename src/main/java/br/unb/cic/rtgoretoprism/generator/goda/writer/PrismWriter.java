@@ -130,6 +130,7 @@ public class PrismWriter {
 	/** the list of plan that are root for a capability of the selected agent */
 	private List<Plan> capabilityPlanList;
 
+	private List<String> rewardVariables = new ArrayList<String>();
 	/**
 	 * Creates a new AgentWriter instance
 	 * 
@@ -289,7 +290,14 @@ public class PrismWriter {
 		if (plan.getCostRegex() != null) {
 			String rewardPattern = new String(this.rewardPattern);
 			rewardPattern = rewardPattern.replace(GID_TAG, plan.getClearElId());
-			rewardPattern = rewardPattern.replace(COST_VALUE_TAG, plan.getCostValue());
+			String costVariable = plan.getCostVariable();
+			if (costVariable == null) {
+				rewardPattern = rewardPattern.replace(COST_VALUE_TAG, plan.getCostValue());
+			}
+			else {
+				rewardPattern = rewardPattern.replace(COST_VALUE_TAG, plan.getCostValue() + "*" + costVariable);
+				if (!this.rewardVariables.contains(costVariable)) this.rewardVariables.add(costVariable);
+			}
 			rewardModule = rewardModule.append(rewardPattern);
 		}
 	}
@@ -673,9 +681,17 @@ public class PrismWriter {
 	private void printModel( PrintWriter adf ) {
 	
 		body = body.replace(GOAL_MODULES_TAG, planModules);
-		reward = reward.replace(REWARD_TAG, rewardModule);
+		reward = declareRewardVariable() + "\n" + reward.replace(REWARD_TAG, rewardModule);
 
 		String model = header + "\n" + body + reward;
 		ManageWriter.printModel(adf, model);
+	}
+
+	private String declareRewardVariable() {
+		StringBuilder variables = new StringBuilder();
+		for (String var : this.rewardVariables) {
+			variables.append("const double " + var + ";\n");
+		}
+		return variables.toString();
 	}
 }

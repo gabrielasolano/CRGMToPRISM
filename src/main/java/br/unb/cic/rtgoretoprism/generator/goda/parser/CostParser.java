@@ -20,6 +20,7 @@ import br.unb.cic.CostRegexBaseVisitor;
 import br.unb.cic.CostRegexLexer;
 import br.unb.cic.CostRegexParser;
 import br.unb.cic.CostRegexParser.GCostContext;
+import br.unb.cic.CostRegexParser.GVariableContext;
 import br.unb.cic.RTRegexBaseVisitor;
 import br.unb.cic.RTRegexLexer;
 import br.unb.cic.RTRegexParser;
@@ -78,17 +79,26 @@ public class CostParser{
 		CostRegexVisitor costRegexVisitor = new CostRegexVisitor();
 		costRegexVisitor.visit(tree);
 
-		return new Object [] {costRegexVisitor.costValue};
+		return new Object [] {costRegexVisitor.costValue, costRegexVisitor.costVariable};
 	}
 }
 
 class CostRegexVisitor extends  CostRegexBaseVisitor<String> {
-	String costValue;
+	String costValue = null;
+	String costVariable = null;
 	
 	@Override
 	public String visitGCost(GCostContext ctx) {
 		costValue = ctx.FLOAT().getText();
 		return costValue;
+	}
+
+	@Override
+	public String visitGVariable(GVariableContext ctx) {
+		costValue = ctx.FLOAT().getText();
+		costVariable = ctx.VAR().getText();
+
+		return costValue + "*" + costVariable;
 	}
 
 }

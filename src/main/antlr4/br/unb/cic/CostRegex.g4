@@ -6,13 +6,15 @@ grammar CostRegex;
    }
 }
 
-cost:     'C' op='=' FLOAT				# gCost
- 	|     NEWLINE                       # blank
+cost:	'C' op='=' FLOAT			# gCost
+	|	'C' op='=' FLOAT VAR		# gVariable
+ 	|	NEWLINE						# blank
   	;
 
-FLOAT		: DIGIT+'.'?DIGIT* 	;
-NEWLINE 	: [\r\n]+           ;
-WS          : [\t]+ -> skip 	;
+FLOAT		: DIGIT+'.'?DIGIT* 			;
+VAR     	: ('a'..'z'|'A'..'Z'|'_')+	;
+NEWLINE 	: [\r\n]+           		;
+WS          : [\t]+ -> skip 			;
 
 fragment
-DIGIT		: [0-9]				;
+DIGIT		: [0-9]						;

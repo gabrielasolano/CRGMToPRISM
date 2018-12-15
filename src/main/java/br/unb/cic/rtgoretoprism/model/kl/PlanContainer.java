@@ -45,7 +45,8 @@ public class PlanContainer extends RTContainer{
 	private ArrayList<PlanContainer> parentlist;
 	private String costRegex;
 	private String costValue;
-	
+	private String costVariable;
+
 	/**
 	 * Creates a new PlanContainer instance
 	 * 
@@ -159,5 +160,13 @@ public class PlanContainer extends RTContainer{
 
 	public void setCostValue(String costValue) {
 		this.costValue = costValue;
+	}
+	
+	public String getCostVariable() {
+		return costVariable;
+	}
+
+	public void setCostVariable(String costVariable) {
+		this.costVariable = costVariable;
 	}
 }
