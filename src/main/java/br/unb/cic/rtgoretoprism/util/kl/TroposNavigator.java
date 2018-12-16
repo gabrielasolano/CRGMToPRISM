@@ -278,10 +278,6 @@ public class TroposNavigator {
 		return getBooleanDec(g, TroposIntentional.class).size() == 0 ? false : true;
 	}
 
-	public boolean hasDecomposition(TroposIntentional g){
-		if (g.getOutcomingRelations().size() > 0) return true;
-		return false;
-	}
 	/**
 	 * Verify if this goal is AND decomposed
 	 * 

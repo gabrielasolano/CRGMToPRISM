@@ -351,7 +351,7 @@ public class RTGoreProducer {
 		//Integer prevPath = pc.getPrevTimePath();
 		//Integer rootPath = pc.getTimePath();
 		//Integer rootTime = pc.getTimeSlot();
-		if (tn.hasDecomposition(p)){
+		if (tn.isBooleanDec(p)){
 			storeRegexResults(pc.getUid(), pc.getRtRegex(), pc.getDecomposition());
 		}
 		else {
