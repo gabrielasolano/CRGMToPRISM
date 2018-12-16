@@ -63,6 +63,7 @@ import br.unb.cic.rtgoretoprism.model.kl.GoalContainer;
 import br.unb.cic.rtgoretoprism.model.kl.PlanContainer;
 import br.unb.cic.rtgoretoprism.model.kl.RTContainer;
 import br.unb.cic.rtgoretoprism.model.kl.SoftgoalContainer;
+import br.unb.cic.rtgoretoprism.util.FileUtility;
 import br.unb.cic.rtgoretoprism.util.NameUtility;
 import br.unb.cic.rtgoretoprism.util.kl.TroposNavigator;
 
@@ -176,9 +177,30 @@ public class RTGoreProducer {
 			// write the DTMC PRISM file to the output folder given the template input folder
 			PrismWriter writer = new DTMCWriter( ad, planList, inputFolder, outputFolder, parametric);
 			writer.writeModel();
+			
+			//Generate pctl formulas
+			generatePctlFormulas(ad);
 		}
 		ATCConsole.println( "DTMC model created in " + (new Date().getTime() - startTime) + "ms.");
 		return ad;
+	}
+
+	private void generatePctlFormulas(AgentDefinition ad) throws IOException {
+
+		StringBuilder pmax = new StringBuilder("Pmax=? [ F \"success\" ]");
+		StringBuilder pmin = new StringBuilder("Pmin=? [ F \"success\" ]");
+		StringBuilder rmax = new StringBuilder("R{\"cost\"}max=? [ F \"success\" ]");
+		StringBuilder rmin = new StringBuilder("R{\"cost\"}min=? [ F \"success\" ]");
+
+		FileUtility.deleteFile(outputFolder + "/AgentRole_" + ad.getAgentName() + "/ReachabilityMax.pctl", false);
+		FileUtility.deleteFile(outputFolder + "/AgentRole_" + ad.getAgentName() + "/ReachabilityMin.pctl", false);
+		FileUtility.deleteFile(outputFolder + "/AgentRole_" + ad.getAgentName() + "/CostMax.pctl", false);
+		FileUtility.deleteFile(outputFolder + "/AgentRole_" + ad.getAgentName() + "/CostMin.pctl", false);
+		
+		FileUtility.writeFile(pmax.toString(), outputFolder + "/AgentRole_" + ad.getAgentName() + "/ReachabilityMax.pctl");
+		FileUtility.writeFile(pmin.toString(), outputFolder + "/AgentRole_" + ad.getAgentName() + "/ReachabilityMin.pctl");
+		FileUtility.writeFile(rmax.toString(), outputFolder + "/AgentRole_" + ad.getAgentName() + "/CostMax.pctl");
+		FileUtility.writeFile(rmin.toString(), outputFolder + "/AgentRole_" + ad.getAgentName() + "/CostMin.pctl");
 	}
 	
 	/**

@@ -260,8 +260,10 @@ public class PrismWriter {
 			}
 			if(prevGoalFormula != null)
 				goalFormula.replace(goalFormula.lastIndexOf(operator), goalFormula.length(), "");
-			if(root.isIncluded())
-				planModules = planModules.append("formula " + root.getClearElId() + " = " + goalFormula + ";\n\n");
+			if(root.isIncluded()) {
+				planModules = planModules.append("formula " + root.getClearElId() + " = " + goalFormula + ";\n");
+				planModules = planModules.append("label \"success\" = " + root.getClearElId() + ";");
+			}
 			return new String [] {root.getClearElId(), goalFormula.toString()};
 		}else if(!root.getDecompPlans().isEmpty()){
 			StringBuilder taskFormula = new StringBuilder();
