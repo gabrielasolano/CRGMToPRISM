@@ -226,6 +226,7 @@ public class PrismWriter {
 					root, 
 					leafGoalPattern,							
 					null);
+			planModules = planModules.append("label \"success\" = " + root.getClearElId() + ";");
 		}
 	}
 
@@ -262,7 +263,6 @@ public class PrismWriter {
 				goalFormula.replace(goalFormula.lastIndexOf(operator), goalFormula.length(), "");
 			if(root.isIncluded()) {
 				planModules = planModules.append("formula " + root.getClearElId() + " = " + goalFormula + ";\n");
-				planModules = planModules.append("label \"success\" = " + root.getClearElId() + ";");
 			}
 			return new String [] {root.getClearElId(), goalFormula.toString()};
 		}else if(!root.getDecompPlans().isEmpty()){
@@ -692,7 +692,7 @@ public class PrismWriter {
 	private String declareRewardVariable() {
 		StringBuilder variables = new StringBuilder();
 		for (String var : this.rewardVariables) {
-			variables.append("const double " + var + ";\n");
+			variables.append("\nconst double " + var + ";");
 		}
 		return variables.toString();
 	}
