@@ -277,7 +277,25 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		reliabilityFormula = "( " + paramFormulaT + " * " + paramFormulaS
 				+ " - " + paramFormulaT + " * " + paramFormulaF
 				+ " + " + paramFormulaF + " )";
+		
+		if (paramFormulaS.equals("1")) {
+			costFormula = "(- " + paramFormulaF + " * R_" + paramFormulaT
+					+ " + " + paramFormulaT
+					+ " + " + paramFormulaF + " )";
 
+		}
+		else if (paramFormulaF.equals("1")) {
+			costFormula = "( " + paramFormulaS + " * R_" + paramFormulaT 
+					+ " + " + paramFormulaT + " )";
+		}
+		else{
+			costFormula = "( " + paramFormulaS + " * R_" + paramFormulaT 
+					+ " - " + paramFormulaF + " * R_" + paramFormulaT
+					+ " + " + paramFormulaT
+					+ " + " + paramFormulaF + " )";
+	
+		}
+		
 		return gidT;
 	}
 

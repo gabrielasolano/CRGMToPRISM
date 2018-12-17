@@ -296,6 +296,10 @@ public class PARAMProducer {
 			subNodeForm = restricToString(subNodeForm);
 			nodeForm = nodeForm.replaceAll(subNodeId, subNodeForm);
 		}
+		
+		if (nodeForm.contains(" R_")) {
+			nodeForm = nodeForm.replaceAll(" R_", " rTask");
+		}
 
 		return nodeForm;
 	}
