@@ -142,7 +142,7 @@ public class RTGoreProducer {
 			if(!a.isIsSystem())
 				return ad;
 
-			ATCConsole.println( "Generating DTMC model for: " + a.getName() );
+			ATCConsole.println( "Generating MDP model for: " + a.getName() );
 
 			//generate the AgentDefinition object for the current actor
 			ad = new AgentDefinition( a );
@@ -181,7 +181,7 @@ public class RTGoreProducer {
 			//Generate pctl formulas
 			generatePctlFormulas(ad);
 		}
-		ATCConsole.println( "DTMC model created in " + (new Date().getTime() - startTime) + "ms.");
+		ATCConsole.println( "MDP model created in " + (new Date().getTime() - startTime) + "ms.");
 		return ad;
 	}
 

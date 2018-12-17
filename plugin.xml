@@ -113,7 +113,7 @@
 			id="br.unb.cic.rtgoretoprism.vc.PRISMCodeGen">
 			
 			<action
-				label="PRISM DTMC Code Generation"
+				label="PRISM MDP Code Generation"
 				class="br.unb.cic.rtgoretoprism.action.PRISMCodeGenerationAction"
 				menubarPath="br.unb.cic.rtgoretoprism.vc.subMenu/group1"
 				enablesFor="+"
