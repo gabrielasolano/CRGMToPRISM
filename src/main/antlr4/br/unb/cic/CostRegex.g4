@@ -6,8 +6,9 @@ grammar CostRegex;
    }
 }
 
-cost:	'C' op='=' FLOAT			# gCost
-	|	'C' op='=' FLOAT VAR		# gVariable
+cost:	'C' op='=' FLOAT			# gFloat
+	|	'C' op='=' FLOAT VAR		# gExpression
+	|	'C' op='=' VAR				# gVariable
  	|	NEWLINE						# blank
   	;
 
