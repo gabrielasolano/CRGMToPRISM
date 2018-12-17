@@ -118,7 +118,7 @@ public class SymbolicParamAltGenerator {
 		
 		for (String node : nodes) {
 			if (param.length() == 0) {
-				param.append("( 2 * " + node + " * XOR_" + node);
+				param.append("(( 2 * " + node + " * XOR_" + node);
 			}
 			else {
 				param.append(" + 2 * " + node + " * XOR_" + node);
@@ -134,7 +134,7 @@ public class SymbolicParamAltGenerator {
 			}
 		}
 		
-		param.append(" )");
+		param.append(" ) / 2)");
 		return param.toString();
 	}
 
