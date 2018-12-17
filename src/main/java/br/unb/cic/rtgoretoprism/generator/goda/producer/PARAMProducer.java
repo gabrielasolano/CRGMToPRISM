@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import br.unb.cic.rtgoretoprism.console.ATCConsole;
 import br.unb.cic.rtgoretoprism.generator.CodeGenerationException;
+import br.unb.cic.rtgoretoprism.generator.goda.parser.CostParser;
 import br.unb.cic.rtgoretoprism.generator.goda.parser.RTParser;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.ManageWriter;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.ParamWriter;
@@ -63,15 +64,16 @@ public class PARAMProducer {
 
 			ATCConsole.println("Generating PARAM formulas for: " + agentName);
 
-			//Generate pctl formula
-			generatePctlFormula();
-
 			// Compose goal formula
-			String nodeForm = composeNodeForm(ad.rootlist.getFirst());
-			nodeForm = cleanNodeForm(nodeForm);
+			String reliabilityForm = composeNodeForm(ad.rootlist.getFirst(), true);
+			String costForm = composeNodeForm(ad.rootlist.getFirst(), false);
+			
+			reliabilityForm = cleanNodeForm(reliabilityForm);
+			costForm = cleanNodeForm(costForm);
 
 			//Print formula
-			printFormula(nodeForm);
+			printFormula(reliabilityForm, costForm);
+
 		}
 		ATCConsole.println( "PARAM formulas created in " + (new Date().getTime() - startTime) + "ms.");
 	}
@@ -85,7 +87,7 @@ public class PARAMProducer {
 		return nodeForm;
 	}
 
-	private void generatePctlFormula() throws IOException {
+	/*private void generatePctlFormula() throws IOException {
 
 		StringBuilder pctl = new StringBuilder("P=? [ true U (");
 		StringBuilder goals = new StringBuilder();
@@ -101,17 +103,20 @@ public class PARAMProducer {
 
 		FileUtility.deleteFile(targetFolder + "/AgentRole_" + agentName + "/reachability.pctl", false);
 		FileUtility.writeFile(pctl.toString(), targetFolder + "/AgentRole_" + agentName + "/reachability.pctl");
-	}
+	}*/
 
-	private void printFormula(String nodeForm) throws CodeGenerationException {
+	private void printFormula(String reliabilityForm, String costForm) throws CodeGenerationException {
 
-		nodeForm = composeFormula(nodeForm);
+		reliabilityForm = composeFormula(reliabilityForm);
+		costForm = composeFormula(costForm);
 
 		String output = targetFolder + "/" + PathLocation.BASIC_AGENT_PACKAGE_PREFIX + agentName + "/";
 
-		PrintWriter generalFormula = ManageWriter.createFile("result.out", output);
-
-		ManageWriter.printModel(generalFormula, nodeForm);
+		PrintWriter reliabiltyFormula = ManageWriter.createFile("reliability.out", output);
+		PrintWriter costFormula = ManageWriter.createFile("cost.out", output);
+		
+		ManageWriter.printModel(reliabiltyFormula, reliabilityForm);
+		ManageWriter.printModel(costFormula, costForm);
 	}
 
 	private String composeFormula(String nodeForm) throws CodeGenerationException {
@@ -149,7 +154,8 @@ public class PARAMProducer {
 		return body;
 	}
 
-	private String composeNodeForm(RTContainer rootNode) throws IOException, CodeGenerationException {
+	//true: compose reliability, false: compose cost
+	private String composeNodeForm(RTContainer rootNode, boolean reliability) throws IOException, CodeGenerationException {
 
 		Const decType;
 		String rtAnnot;
@@ -168,19 +174,19 @@ public class PARAMProducer {
 		rtAnnot = rootNode.getRtRegex();
 		ctxAnnot = rootNode.getFulfillmentConditions();
 
-		nodeForm = getNodeForm(decType, rtAnnot, nodeId);
-
+		nodeForm = getNodeForm(decType, rtAnnot, nodeId, reliability);
+		
 		/*Run for sub goals*/
 		for (GoalContainer subNode : decompGoal) {
 			String subNodeId = subNode.getClearUId();
-			String subNodeForm = composeNodeForm(subNode);
+			String subNodeForm = composeNodeForm(subNode, reliability);
 			nodeForm = replaceSubForm(nodeForm, subNodeForm, nodeId, subNodeId);
 		}
 
 		/*Run for sub tasks*/
 		for (PlanContainer subNode : decompPlans) {
 			String subNodeId = subNode.getClearElId();
-			String subNodeForm = composeNodeForm(subNode);
+			String subNodeForm = composeNodeForm(subNode, reliability);
 			nodeForm = replaceSubForm(nodeForm, subNodeForm, nodeId, subNodeId);
 		}
 
@@ -189,13 +195,19 @@ public class PARAMProducer {
 
 			this.leavesId.add(nodeId);
 
-			//Create DTMC model (param)
-			ParamWriter writer = new ParamWriter(sourceFolder, nodeId);
-			String model = writer.writeModel();
+			if (reliability) {
+				//Create DTMC model (param)
+				ParamWriter writer = new ParamWriter(sourceFolder, nodeId);
+				String model = writer.writeModel();
 
-			//Call to param
-			ParamWrapper paramWrapper = new ParamWrapper(toolsFolder, nodeId);
-			nodeForm = paramWrapper.getFormula(model);
+				//Call to param (reliability)
+				ParamWrapper paramWrapper = new ParamWrapper(toolsFolder, nodeId);
+				nodeForm = paramWrapper.getFormula(model);
+			}
+			else {
+				//Cost
+				nodeForm = getCostFormula(rootNode);
+			}
 
 			if (!ctxAnnot.isEmpty()) {
 				nodeForm = insertCtxAnnotation(nodeForm, ctxAnnot, nodeId);
@@ -206,6 +218,17 @@ public class PARAMProducer {
 		}
 
 		return nodeForm;
+	}
+
+	private String getCostFormula(RTContainer rootNode) throws IOException {
+		PlanContainer plan = (PlanContainer) rootNode;
+	
+		if (plan.getCostRegex() != null) {
+			Object [] res = CostParser.parseRegex(plan.getCostRegex());
+			return (String) res[2];
+		}
+		
+		return "0";
 	}
 
 	/*Remove XOR parameter from the symbolic formula*/
@@ -281,8 +304,8 @@ public class PARAMProducer {
 		return " " + subNodeString + " ";
 	}
 
-	private String getNodeForm(Const decType, String rtAnnot, String uid) throws IOException {
-
+	private String getNodeForm(Const decType, String rtAnnot, String uid, boolean reliability) throws IOException {
+		
 		if (rtAnnot == null) {
 			return uid;
 		}
@@ -291,7 +314,8 @@ public class PARAMProducer {
 
 		checkOptXorDeclaration((String) res[5]);
 
-		return (String) res[5];
+		if (reliability) return (String) res[5];		
+		return (String) res[6];
 	}
 
 	private void checkOptXorDeclaration(String formula) {

@@ -56,26 +56,29 @@ public class CostParser{
 		CostRegexVisitor costRegexVisitor = new CostRegexVisitor();
 		costRegexVisitor.visit(tree);
 
-		return new Object [] {costRegexVisitor.costValue, costRegexVisitor.costVariable};
+		return new Object [] {costRegexVisitor.costValue, costRegexVisitor.costVariable, costRegexVisitor.costFormula};
 	}
 }
 
 class CostRegexVisitor extends  CostRegexBaseVisitor<String> {
 	String costValue = null;
 	String costVariable = null;
+	String costFormula = null;
 
 	@Override
 	public String visitGVariable(GVariableContext ctx) {
 		costValue = "1";
 		costVariable = ctx.VAR().getText();
 
-		return costValue + "*" + costVariable;
+		costFormula = costValue + "*" + costVariable;
+		return costFormula;
 	}
 
 	@Override
 	public String visitGFloat(GFloatContext ctx) {
 		costValue = ctx.FLOAT().getText();
-		return costValue;
+		costFormula = costValue;
+		return costFormula;
 	}
 
 	@Override
@@ -83,7 +86,8 @@ class CostRegexVisitor extends  CostRegexBaseVisitor<String> {
 		costValue = ctx.FLOAT().getText();
 		costVariable = ctx.VAR().getText();
 
-		return costValue + "*" + costVariable;
+		costFormula = costValue + "*" + costVariable;
+		return costFormula;
 	}
 
 }

@@ -76,7 +76,8 @@ public class RTParser{
 				rtRegexVisitor.altMemory,
 				rtRegexVisitor.tryMemory,
 				rtRegexVisitor.optMemory,
-				rtRegexVisitor.paramFormula};
+				rtRegexVisitor.reliabilityFormula,
+				rtRegexVisitor.costFormula};
 	}
 }
 
@@ -84,7 +85,8 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 
 	final String uid;
 	final Const decType;
-	String paramFormula = new String();
+	String reliabilityFormula = new String();
+	String costFormula = new String();
 	Map<String, Boolean[]> timeMemory = new HashMap<String, Boolean[]>();		
 	Map<String, Object[]> cardMemory = new HashMap<String, Object[]>();
 	Map<String, Set<String>> altMemory = new HashMap<String, Set<String>>();
@@ -125,9 +127,9 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 
 	private String checkNestedRT (String paramFormulaAux) {
 
-		if (!paramFormula.isEmpty()) {
-			paramFormulaAux = paramFormula;
-			paramFormula = "";
+		if (!reliabilityFormula.isEmpty()) {
+			paramFormulaAux = reliabilityFormula;
+			reliabilityFormula = "";
 		}
 		return paramFormulaAux;
 	}
@@ -153,11 +155,12 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		}
 
 		if (decType.equals(Const.AND)) {
-			paramFormula = "( " + paramFormulaAo + " * " + paramFormulaBo + " )";
+			reliabilityFormula = "( " + paramFormulaAo + " * " + paramFormulaBo + " )";
+			costFormula = "( " + paramFormulaAo + " + " + paramFormulaBo + " )";
 		}
 		else {
 			//paramFormula = "(MAX( " + paramFormulaAo + " , " + paramFormulaBo + " ))";
-			paramFormula = "(-1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
+			reliabilityFormula = "(-1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
 					+ paramFormulaAo + " + " + paramFormulaBo + " )";
 		}
 		return gidAo + '-' + gidBo;
@@ -188,7 +191,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		}
 
 		SymbolicParamAltGenerator param = new SymbolicParamAltGenerator();
-		paramFormula = param.getAlternativeFormula(gids);
+		reliabilityFormula = param.getAlternativeFormula(gids);
 
 		return gidAo + '-' + gidBo;
 	}
@@ -206,7 +209,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		paramFormulaId = checkNestedRT(paramFormulaId);
 
 		String clearId = gId.replaceAll("\\.", "_");
-		paramFormula = "(OPT_" + clearId + " * " + paramFormulaId
+		reliabilityFormula = "(OPT_" + clearId + " * " + paramFormulaId
 				+ " - " + "OPT_" + clearId + " + 1)"; 
 		optMemory.put(gId, true);
 
@@ -223,16 +226,16 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		String k = ctx.FLOAT().getText();
 		if(ctx.op.getType() == RTRegexParser.INT) {
 			cardMemory.put(gid, new Object[]{Const.INT,Integer.parseInt(ctx.FLOAT().getText())});
-			paramFormula = "(( " + paramFormulaId + " )^" + k + ")";
+			reliabilityFormula = "(( " + paramFormulaId + " )^" + k + ")";
 		}
 		else if(ctx.op.getType() == RTRegexParser.C_SEQ) {
 			cardMemory.put(gid, new Object[]{Const.SEQ,Integer.parseInt(ctx.FLOAT().getText())});
-			paramFormula = "(( " + paramFormulaId + " )^" + k + ")";
+			reliabilityFormula = "(( " + paramFormulaId + " )^" + k + ")";
 		}
 		else {
 			cardMemory.put(gid, new Object[]{Const.RTRY,Integer.parseInt(ctx.FLOAT().getText())});
 			k = String.valueOf(Integer.valueOf(k) + 1);
-			paramFormula = "(1 - (1 - " + paramFormulaId + " )^" + k + ")";
+			reliabilityFormula = "(1 - (1 - " + paramFormulaId + " )^" + k + ")";
 		}	
 		return gid;
 	}
@@ -266,7 +269,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		}
 		tryMemory.put(gidT, new String[]{gidS, gidF});
 
-		paramFormula = "( " + paramFormulaT + " * " + paramFormulaS
+		reliabilityFormula = "( " + paramFormulaT + " * " + paramFormulaS
 				+ " - " + paramFormulaT + " * " + paramFormulaF
 				+ " + " + paramFormulaF + " )";
 
