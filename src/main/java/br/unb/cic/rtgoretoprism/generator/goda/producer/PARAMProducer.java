@@ -41,6 +41,7 @@ public class PARAMProducer {
 	private List<String> leavesId = new ArrayList<String>();
 	private List<String> opts_formula = new ArrayList<String>();
 	private Map<String,String> ctxInformation = new HashMap<String,String>();
+	private Map<String,String> reliabilityByNode = new HashMap<String,String>();
 
 	public PARAMProducer(Set<Actor> allActors, Set<FHardGoal> allGoals, String in, String out, String tools) {
 
@@ -68,8 +69,8 @@ public class PARAMProducer {
 			String reliabilityForm = composeNodeForm(ad.rootlist.getFirst(), true);
 			String costForm = composeNodeForm(ad.rootlist.getFirst(), false);
 			
-			reliabilityForm = cleanNodeForm(reliabilityForm);
-			costForm = cleanNodeForm(costForm);
+			reliabilityForm = cleanNodeForm(reliabilityForm, true);
+			costForm = cleanNodeForm(costForm, false);
 
 			//Print formula
 			printFormula(reliabilityForm, costForm);
@@ -78,12 +79,31 @@ public class PARAMProducer {
 		ATCConsole.println( "PARAM formulas created in " + (new Date().getTime() - startTime) + "ms.");
 	}
 
-	private String cleanNodeForm(String nodeForm) {
+	private String cleanNodeForm(String nodeForm, boolean reliability) {
+		
+		if (!reliability) {
+			nodeForm = replaceReliabilites(nodeForm);
+		}
+		
 		nodeForm = nodeForm.replaceAll("\\s+", "");
 		nodeForm = nodeForm.replaceAll("\\+1", " +1");
 		nodeForm = nodeForm.replaceAll("-1", " -1");
 		nodeForm = nodeForm.replaceAll("\\+(?!1)", " + ");
 		nodeForm = nodeForm.replaceAll("-(?!1)", " - ");
+		return nodeForm;
+	}
+
+	private String replaceReliabilites(String nodeForm) {
+		if (nodeForm.contains(" R_")) {
+			String[] variables = nodeForm.split(" ");
+			for (String var : variables) {
+				if (var.contains("R_") && !var.contains("XOR")) {
+					String id = var.substring(2, var.length());
+					String reliability = this.reliabilityByNode.get(id);
+					nodeForm = nodeForm.replaceAll(" " + var + " ", " " + reliability + " ");
+				}
+			}
+		}
 		return nodeForm;
 	}
 
@@ -217,6 +237,7 @@ public class PARAMProducer {
 			}	
 		}
 
+		if (reliability) this.reliabilityByNode.put(nodeId, nodeForm);
 		return nodeForm;
 	}
 
@@ -297,9 +318,9 @@ public class PARAMProducer {
 			nodeForm = nodeForm.replaceAll(subNodeId, subNodeForm);
 		}
 		
-		if (nodeForm.contains(" R_")) {
+		/*if (nodeForm.contains(" R_")) {
 			nodeForm = nodeForm.replaceAll(" R_", " rTask");
-		}
+		}*/
 
 		return nodeForm;
 	}

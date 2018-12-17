@@ -195,6 +195,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 
 		SymbolicParamAltGenerator param = new SymbolicParamAltGenerator();
 		reliabilityFormula = param.getAlternativeFormula(gids);
+		costFormula = param.getCostAlternativeFormula(gids);
 
 		return gidAo + '-' + gidBo;
 	}

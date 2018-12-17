@@ -92,4 +92,57 @@ public class SymbolicParamAltGenerator {
 		}
 		return list;
 	}
+	
+	private static String[] generateList(String[] nodes) {
+
+		String[] list = new String[nodes.length];
+		for (int i = 0; i < nodes.length; i++) {
+			String xor = "XOR_" + nodes[i];
+			list[i] = xor;
+		}
+		return list;
+	}
+	
+	//Generation of cost formula for alternative annotation.
+	public String getCostAlternativeFormula (String[] nodes) {
+		
+		String xor[] = generateList(nodes);
+        List<String[]> list = new ArrayList<String[]>();
+
+        GenerateCombination comb1 = new GenerateCombination(xor, 2) ;
+        while (comb1.hasNext()) {
+        	list.add(comb1.next());
+        }
+
+		StringBuilder param = new StringBuilder();
+		
+		for (String node : nodes) {
+			if (param.length() == 0) {
+				param.append("( 2 * " + node + " * XOR_" + node);
+			}
+			else {
+				param.append(" + 2 * " + node + " * XOR_" + node);
+			}
+		}
+		for (String node : nodes) {
+			for (String[] comb : list) {
+				if (comb[0].contains(node) || comb[1].contains(node)) {
+					param.append(" + 2 * " + node + " * " + comb[0] + " * " + comb[1]);
+					String otherNode = getOtherNode(comb, node);
+					param.append(" - " + node + " * R_" + otherNode + " * " + comb[0] + " * " + comb[1]);
+				}
+			}
+		}
+		
+		param.append(" )");
+		return param.toString();
+	}
+
+	private String getOtherNode(String[] comb, String node) {
+		
+		if (comb[0].contains(node)) return comb[1].substring(4, comb[1].length());
+		
+		return comb[0].substring(4, comb[0].length());
+	}
+	
 }
