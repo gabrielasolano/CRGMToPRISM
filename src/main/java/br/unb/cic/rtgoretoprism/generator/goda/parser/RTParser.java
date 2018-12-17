@@ -162,6 +162,9 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 			//paramFormula = "(MAX( " + paramFormulaAo + " , " + paramFormulaBo + " ))";
 			reliabilityFormula = "(-1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
 					+ paramFormulaAo + " + " + paramFormulaBo + " )";
+			if (ctx.op.getType() == RTRegexParser.INT) {
+				costFormula = "( " + paramFormulaAo + " + " + paramFormulaBo + " )";
+			}
 		}
 		return gidAo + '-' + gidBo;
 	}
@@ -211,6 +214,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		String clearId = gId.replaceAll("\\.", "_");
 		reliabilityFormula = "(OPT_" + clearId + " * " + paramFormulaId
 				+ " - " + "OPT_" + clearId + " + 1)"; 
+		costFormula = "(OPT_" + clearId + " * " + paramFormulaId + " )";
 		optMemory.put(gId, true);
 
 		return gId;
@@ -227,6 +231,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		if(ctx.op.getType() == RTRegexParser.INT) {
 			cardMemory.put(gid, new Object[]{Const.INT,Integer.parseInt(ctx.FLOAT().getText())});
 			reliabilityFormula = "(( " + paramFormulaId + " )^" + k + ")";
+			costFormula = "( " + paramFormulaId + " * " + k + " )";
 		}
 		else if(ctx.op.getType() == RTRegexParser.C_SEQ) {
 			cardMemory.put(gid, new Object[]{Const.SEQ,Integer.parseInt(ctx.FLOAT().getText())});
