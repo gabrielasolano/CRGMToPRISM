@@ -127,11 +127,19 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		return gid;
 	}
 
-	private String checkNestedRT (String paramFormulaAux) {
+	private String checkNestedRT (String paramFormulaAux, boolean isReliability) {
 
-		if (!reliabilityFormula.isEmpty()) {
-			paramFormulaAux = reliabilityFormula;
-			reliabilityFormula = "";
+		if (isReliability) {
+			if (!reliabilityFormula.isEmpty()) {
+				paramFormulaAux = reliabilityFormula;
+				reliabilityFormula = "";
+			}	
+		}
+		else {
+			if (!costFormula.isEmpty()) {
+				paramFormulaAux = costFormula;
+				costFormula = "";
+			}
 		}
 		return paramFormulaAux;
 	}
@@ -140,11 +148,15 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 	public String visitGTime(GTimeContext ctx) {
 		String gidAo = visit(ctx.expr(0));
 		String paramFormulaAo = gidAo.replaceAll("\\.", "_");
-		paramFormulaAo = checkNestedRT(paramFormulaAo);
-
+		String paramCostAo = paramFormulaAo;
+		paramFormulaAo = checkNestedRT(paramFormulaAo, true);
+		paramCostAo = checkNestedRT(paramCostAo, false);
+		
 		String gidBo = visit(ctx.expr(1));
 		String paramFormulaBo = gidBo.replaceAll("\\.", "_");
-		paramFormulaBo = checkNestedRT(paramFormulaBo);
+		String paramCostBo = paramFormulaBo;
+		paramFormulaBo = checkNestedRT(paramFormulaBo, true);
+		paramCostBo = checkNestedRT(paramCostBo, false);
 
 		String [] gidAs = gidAo.split("-");
 		String [] gidBs = gidBo.split("-");
@@ -180,7 +192,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 					+ paramFormulaAo + " + " + paramFormulaBo + " )";
 			SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
 			if (ctx.op.getType() == RTRegexParser.INT) {
-				costFormula = "( " + paramFormulaAo + " + " + paramFormulaBo + " )";
+				costFormula = "( " + paramCostAo + " + " + paramCostBo + " )";
 			}
 			else {
 				costFormula = param.getSequentialOrCost(gids);
@@ -230,12 +242,14 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 	public String visitGOpt(GOptContext ctx) {
 		String gId = super.visit(ctx.expr());
 		String paramFormulaId = gId.replaceAll("\\.", "_");
-		paramFormulaId = checkNestedRT(paramFormulaId);
+		String paramCostId = paramFormulaId;
+		paramFormulaId = checkNestedRT(paramFormulaId, true);
+		paramCostId = checkNestedRT(paramCostId, false);
 
 		String clearId = gId.replaceAll("\\.", "_");
 		reliabilityFormula = "(OPT_" + clearId + " * " + paramFormulaId
 				+ " - " + "OPT_" + clearId + " + 1)"; 
-		costFormula = "(OPT_" + clearId + " * R_" + clearId + " * " + paramFormulaId + " )";
+		costFormula = "(OPT_" + clearId + " * R_" + clearId + " * " + paramCostId + " )";
 		optMemory.put(gId, true);
 
 		return gId;
@@ -246,18 +260,20 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 
 		String gid = visit(ctx.expr());
 		String paramFormulaId = gid.replaceAll("\\.", "_");
-		paramFormulaId = checkNestedRT(paramFormulaId);
-
+		String paramCostId = paramFormulaId;
+		paramFormulaId = checkNestedRT(paramFormulaId, true);
+		paramCostId = checkNestedRT(paramCostId, true);
+		
 		String k = ctx.FLOAT().getText();
 		if(ctx.op.getType() == RTRegexParser.INT) {
 			cardMemory.put(gid, new Object[]{Const.INT,Integer.parseInt(ctx.FLOAT().getText())});
 			reliabilityFormula = "(( " + paramFormulaId + " )^" + k + ")";
-			costFormula = "( " + getMultiplier(k) + " * ( R_" + paramFormulaId + " )^" + k + " * " + paramFormulaId + " )";
+			costFormula = "( " + getMultiplier(k) + " * ( R_" + paramCostId + " )^" + k + " * " + paramCostId + " )";
 		}
 		else if(ctx.op.getType() == RTRegexParser.C_SEQ) {
 			cardMemory.put(gid, new Object[]{Const.SEQ,Integer.parseInt(ctx.FLOAT().getText())});
 			reliabilityFormula = "(( " + paramFormulaId + " )^" + k + ")";
-			costFormula = "( " + k + " * ( R_" + paramFormulaId + " )^" + k + " * " + paramFormulaId + " )";
+			costFormula = "( " + k + " * ( R_" + paramCostId + " )^" + k + " * " + paramCostId + " )";
 		}
 		else {
 			cardMemory.put(gid, new Object[]{Const.RTRY,Integer.parseInt(ctx.FLOAT().getText())});
@@ -281,15 +297,21 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 
 		String gidT = visit(ctx.expr(0));
 		String paramFormulaT = gidT.replaceAll("\\.", "_");
-		paramFormulaT = checkNestedRT(paramFormulaT);
+		String paramCostT = paramFormulaT;
+		paramFormulaT = checkNestedRT(paramFormulaT, true);
+		paramCostT = checkNestedRT(paramCostT, false);
 
 		String gidS = visit(ctx.expr(1));
 		String paramFormulaS = "1";
-		paramFormulaS = checkNestedRT(paramFormulaS);
+		String paramCostS = "1";
+		paramFormulaS = checkNestedRT(paramFormulaS, true);
+		paramCostS = checkNestedRT(paramCostS, false);
 
 		String gidF = visit(ctx.expr(2));
 		String paramFormulaF = "1";
-		paramFormulaF = checkNestedRT(paramFormulaF);
+		String paramCostF = "1";
+		paramFormulaF = checkNestedRT(paramFormulaF, true);
+		paramCostF = checkNestedRT(paramCostF, false);
 
 		Boolean [] pathTimeS, pathTimeF; 
 		if(gidS != null){
@@ -309,27 +331,27 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 				+ " - " + paramFormulaT + " * " + paramFormulaF
 				+ " + " + paramFormulaF + " )";
 		
-		if (paramFormulaS.equals("1")) { //Try (n)? skip : n1
-			costFormula = "( - R_" + paramFormulaT + " * R_" + paramFormulaF + " * " + paramFormulaT
-					+ " - R_" + paramFormulaT + " * R_" + paramFormulaF + " * " + paramFormulaF
-					+ " + R_" + paramFormulaT + " * " + paramFormulaT
-					+ " + R_" + paramFormulaF + " * " + paramFormulaT
-					+ " + R_" + paramFormulaF + " * " + paramFormulaF + " )";
+		if (paramCostS.equals("1")) { //Try (n)? skip : n1
+			costFormula = "( - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostT
+					+ " - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostF
+					+ " + R_" + paramCostT + " * " + paramCostT
+					+ " + R_" + paramCostF + " * " + paramCostT
+					+ " + R_" + paramCostF + " * " + paramCostF + " )";
 
 		}
-		else if (paramFormulaF.equals("1")) { //Try (n) ? n1 : skip
-			costFormula = "( R_" + paramFormulaT + " * R_" + paramFormulaS + " * " + paramFormulaT
-					+ " + R_" + paramFormulaT + " * R_" + paramFormulaS + " * " + paramFormulaS
-					+ " - R_" + paramFormulaT + " * " + paramFormulaT
-					+ " + " + paramFormulaT + " )";
+		else if (paramCostF.equals("1")) { //Try (n) ? n1 : skip
+			costFormula = "( R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostT
+					+ " + R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostS
+					+ " - R_" + paramCostT + " * " + paramCostT
+					+ " + " + paramCostT + " )";
 		}
 		else{ //Try (n)? n1 : n2
-			costFormula = "( R_" + paramFormulaT + " * R_" + paramFormulaS + " * " + paramFormulaT
-					+ " + R_" + paramFormulaT + " * R_" + paramFormulaS + " * " + paramFormulaS
-					+ " - R_" + paramFormulaT + " * R_" + paramFormulaF + " * " + paramFormulaT
-					+ " - R_" + paramFormulaT + " * R_" + paramFormulaF + " * " + paramFormulaF
-					+ " + R_" + paramFormulaF + " * " + paramFormulaT
-					+ " + R_" + paramFormulaF + " * " + paramFormulaF + " )";
+			costFormula = "( R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostT
+					+ " + R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostS
+					+ " - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostT
+					+ " - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostF
+					+ " + R_" + paramCostF + " * " + paramCostT
+					+ " + R_" + paramCostF + " * " + paramCostF + " )";
 		}
 		
 		return gidT;
