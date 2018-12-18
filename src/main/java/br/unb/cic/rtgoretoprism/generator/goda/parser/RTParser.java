@@ -30,6 +30,7 @@ import br.unb.cic.RTRegexParser.PrintExprContext;
 import br.unb.cic.rtgoretoprism.model.kl.Const;
 import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamAltGenerator;
 import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamAndGenerator;
+import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamOrGenerator;
 
 
 
@@ -177,8 +178,12 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 			//paramFormula = "(MAX( " + paramFormulaAo + " , " + paramFormulaBo + " ))";
 			reliabilityFormula = "(-1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
 					+ paramFormulaAo + " + " + paramFormulaBo + " )";
+			SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
 			if (ctx.op.getType() == RTRegexParser.INT) {
 				costFormula = "( " + paramFormulaAo + " + " + paramFormulaBo + " )";
+			}
+			else {
+				costFormula = param.getSequentialOrCost(gids);
 			}
 		}
 		return gidAo + '-' + gidBo;
