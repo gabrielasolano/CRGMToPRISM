@@ -61,6 +61,43 @@ public interface RTRegexListener extends ParseTreeListener {
 	void exitGTry(@NotNull RTRegexParser.GTryContext ctx);
 
 	/**
+	 * Enter a parse tree produced by the {@code gTime}
+	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterGTime(@NotNull RTRegexParser.GTimeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code gTime}
+	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitGTime(@NotNull RTRegexParser.GTimeContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link RTRegexParser#multiple}.
+	 * @param ctx the parse tree
+	 */
+	void enterMultiple(@NotNull RTRegexParser.MultipleContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RTRegexParser#multiple}.
+	 * @param ctx the parse tree
+	 */
+	void exitMultiple(@NotNull RTRegexParser.MultipleContext ctx);
+
+	/**
+	 * Enter a parse tree produced by the {@code gAlt}
+	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterGAlt(@NotNull RTRegexParser.GAltContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code gAlt}
+	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitGAlt(@NotNull RTRegexParser.GAltContext ctx);
+
+	/**
 	 * Enter a parse tree produced by the {@code gSkip}
 	 * labeled alternative in {@link RTRegexParser#expr}.
 	 * @param ctx the parse tree
@@ -74,17 +111,15 @@ public interface RTRegexListener extends ParseTreeListener {
 	void exitGSkip(@NotNull RTRegexParser.GSkipContext ctx);
 
 	/**
-	 * Enter a parse tree produced by the {@code gTime}
-	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * Enter a parse tree produced by {@link RTRegexParser#id}.
 	 * @param ctx the parse tree
 	 */
-	void enterGTime(@NotNull RTRegexParser.GTimeContext ctx);
+	void enterId(@NotNull RTRegexParser.IdContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code gTime}
-	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * Exit a parse tree produced by {@link RTRegexParser#id}.
 	 * @param ctx the parse tree
 	 */
-	void exitGTime(@NotNull RTRegexParser.GTimeContext ctx);
+	void exitId(@NotNull RTRegexParser.IdContext ctx);
 
 	/**
 	 * Enter a parse tree produced by the {@code gOpt}
@@ -113,17 +148,17 @@ public interface RTRegexListener extends ParseTreeListener {
 	void exitGCard(@NotNull RTRegexParser.GCardContext ctx);
 
 	/**
-	 * Enter a parse tree produced by the {@code gAlt}
+	 * Enter a parse tree produced by the {@code gDecisionMaking}
 	 * labeled alternative in {@link RTRegexParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterGAlt(@NotNull RTRegexParser.GAltContext ctx);
+	void enterGDecisionMaking(@NotNull RTRegexParser.GDecisionMakingContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code gAlt}
+	 * Exit a parse tree produced by the {@code gDecisionMaking}
 	 * labeled alternative in {@link RTRegexParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitGAlt(@NotNull RTRegexParser.GAltContext ctx);
+	void exitGDecisionMaking(@NotNull RTRegexParser.GDecisionMakingContext ctx);
 
 	/**
 	 * Enter a parse tree produced by the {@code printExpr}

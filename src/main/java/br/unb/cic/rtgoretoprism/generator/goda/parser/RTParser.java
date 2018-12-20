@@ -20,6 +20,7 @@ import br.unb.cic.RTRegexLexer;
 import br.unb.cic.RTRegexParser;
 import br.unb.cic.RTRegexParser.GAltContext;
 import br.unb.cic.RTRegexParser.GCardContext;
+import br.unb.cic.RTRegexParser.GDecisionMakingContext;
 import br.unb.cic.RTRegexParser.GIdContext;
 import br.unb.cic.RTRegexParser.GOptContext;
 import br.unb.cic.RTRegexParser.GSkipContext;
@@ -79,7 +80,8 @@ public class RTParser{
 				rtRegexVisitor.tryMemory,
 				rtRegexVisitor.optMemory,
 				rtRegexVisitor.reliabilityFormula,
-				rtRegexVisitor.costFormula};
+				rtRegexVisitor.costFormula,
+				rtRegexVisitor.decisionMemory};
 	}
 }
 
@@ -94,6 +96,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 	Map<String, Set<String>> altMemory = new HashMap<String, Set<String>>();
 	Map<String, String[]> tryMemory = new HashMap<String, String[]>();
 	Map<String, Boolean> optMemory = new HashMap<String, Boolean>();
+	List<String> decisionMemory = new ArrayList<String>();
 
 	public CustomRTRegexVisitor(String uid, Const decType) {
 		this.decType = decType;
@@ -111,10 +114,10 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		visit(ctx.expr());		
 		return "Goals sorted";
 	}
-
+	
 	@Override
 	public String visitGId(GIdContext ctx) {
-		String gid = ctx.t.getText() + ctx.FLOAT().toString();
+		String gid = ctx.t.getText() + ctx.id().getText();
 		if(ctx.t.getType() == RTRegexParser.TASK) {
 			//gid = gid.replaceAll("\\.", "_");
 			gid = uid + '_' + gid;
@@ -186,7 +189,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 				costFormula = param.getParallelAndCost(gids);
 			}
 		}
-		else {
+		else if (decType.equals(Const.OR)) {
 			//paramFormula = "(MAX( " + paramFormulaAo + " , " + paramFormulaBo + " ))";
 			reliabilityFormula = "(-1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
 					+ paramFormulaAo + " + " + paramFormulaBo + " )";
@@ -253,6 +256,55 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		optMemory.put(gId, true);
 
 		return gId;
+	}
+	
+	@Override
+	public String visitGDecisionMaking(GDecisionMakingContext ctx) {
+		String gidAo = super.visit(ctx.multiple().expr(0));
+		String gidBo = super.visit(ctx.multiple().expr(1));
+		
+		String paramFormulaAo = gidAo.replaceAll("\\.", "_");
+		String paramCostAo = paramFormulaAo;
+		paramFormulaAo = checkNestedRT(paramFormulaAo, true);
+		paramCostAo = checkNestedRT(paramCostAo, false);
+		
+		String paramFormulaBo = gidBo.replaceAll("\\.", "_");
+		String paramCostBo = paramFormulaBo;
+		paramFormulaBo = checkNestedRT(paramFormulaBo, true);
+		paramCostBo = checkNestedRT(paramCostBo, false);
+		
+		String [] gidAs = gidAo.split("-");
+		String [] gidBs = gidBo.split("-");		
+		String [] gids = new String[gidAs.length + gidBs.length];
+
+		int i = 0;
+		for(String gidB : gidBs){
+			Boolean [] pathTimeB = timeMemory.get(gidB);			
+			//if(ctx.op.getType() == RTRegexParser.INT){
+				//pathTimeB[0] = true;
+			//}else if(ctx.op.getType() == RTRegexParser.SEQ)
+				//pathTimeB[1] = true;
+			
+			for(String gidA : gidAs){
+				if(!decisionMemory.contains(gidA))
+					decisionMemory.add(gidA);
+				gids[i] = gidA.replaceAll("\\.", "_");
+				i++;
+			}
+			if(!decisionMemory.contains(gidB))
+				decisionMemory.add(gidB);
+			gids[i] = gidB.replaceAll("\\.", "_");
+			i++;
+		}
+		
+		reliabilityFormula = "(-1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
+				+ paramFormulaAo + " + " + paramFormulaBo + " )";
+		
+		/*SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
+		costFormula = "( " + paramCostAo + " + " + paramCostBo + " )";
+		costFormula = param.getSequentialOrCost(gids);*/
+
+		return gidAo + '-' + gidBo;
 	}
 
 	@Override
@@ -356,7 +408,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		
 		return gidT;
 	}
-
+	
 	@Override
 	public String visitGSkip(GSkipContext ctx) {		
 		return null;

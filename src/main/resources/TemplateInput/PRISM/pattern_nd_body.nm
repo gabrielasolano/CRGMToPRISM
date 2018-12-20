@@ -1,0 +1,1 @@
+[success$PREV_TIME_SLOT$] s$GID$ = 0 -> CTX_$N$ : (s$GID$'= $NEXT_STATE$) + (1 - CTX_$N$) : (s$GID$'= 0);

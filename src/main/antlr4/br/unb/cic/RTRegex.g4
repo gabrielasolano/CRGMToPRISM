@@ -15,12 +15,22 @@ expr:   expr op=('+'|'#'|'@') FLOAT				# gCard
     |	'opt(' expr ')'							# gOpt
     |   'try(' expr ')' '?' expr ':' expr		# gTry
     |	expr op=(';'|'#') expr					# gTime
-    |   SKIPP									# gSkip        
-    |   t=('G'|'T') FLOAT						# gId
+    |   SKIPP									# gSkip
+    |	t=('G'|'T') id							# gId
+    |	'DM(' multiple ')'						# gDecisionMaking
     |   '(' expr ')'							# parens
     ;
 
+multiple:	expr op=',' expr
+	;
+    
+id:		FLOAT
+	|	FLOAT X
+	|	X
+	;
+
 FLOAT		: DIGIT+'.'?DIGIT* 	;
+DM			: 'DM'				;
 SEQ         : ';'				;
 INT			: '#'				;
 C_SEQ		: '+'				;
@@ -28,6 +38,7 @@ C_RTRY		: '@'				;
 ALT			: '|'				;
 TASK		: 'T'				;
 GOAL		: 'G'				;
+X			: 'X'				;
 SKIPP		: 'skip'			;
 NEWLINE 	: [\r\n]+           ;
 WS          : [\t]+ -> skip 	;

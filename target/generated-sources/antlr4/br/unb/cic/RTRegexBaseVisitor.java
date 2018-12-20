@@ -50,6 +50,30 @@ public class RTRegexBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitGTime(@NotNull RTRegexParser.GTimeContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitMultiple(@NotNull RTRegexParser.MultipleContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitGAlt(@NotNull RTRegexParser.GAltContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitGSkip(@NotNull RTRegexParser.GSkipContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -58,7 +82,7 @@ public class RTRegexBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitGTime(@NotNull RTRegexParser.GTimeContext ctx) { return visitChildren(ctx); }
+	@Override public T visitId(@NotNull RTRegexParser.IdContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -82,7 +106,7 @@ public class RTRegexBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitGAlt(@NotNull RTRegexParser.GAltContext ctx) { return visitChildren(ctx); }
+	@Override public T visitGDecisionMaking(@NotNull RTRegexParser.GDecisionMakingContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}

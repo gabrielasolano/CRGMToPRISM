@@ -1,0 +1,11 @@
+$DEC_HEADER$
+
+module NonDeterminism_$GID$
+	s$GID$ :[0..$MAX_ND$] init 0;
+	
+	$DEC_TYPE$
+
+$FINAL_TYPE$
+	
+	[success$TIME_SLOT$] s$GID$ =  $MAX_ND$ -> (s$GID$'=$MAX_ND$);
+endmodule

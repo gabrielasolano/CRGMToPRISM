@@ -44,6 +44,29 @@ public interface RTRegexVisitor<T> extends ParseTreeVisitor<T> {
 	T visitGTry(@NotNull RTRegexParser.GTryContext ctx);
 
 	/**
+	 * Visit a parse tree produced by the {@code gTime}
+	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGTime(@NotNull RTRegexParser.GTimeContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link RTRegexParser#multiple}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMultiple(@NotNull RTRegexParser.MultipleContext ctx);
+
+	/**
+	 * Visit a parse tree produced by the {@code gAlt}
+	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGAlt(@NotNull RTRegexParser.GAltContext ctx);
+
+	/**
 	 * Visit a parse tree produced by the {@code gSkip}
 	 * labeled alternative in {@link RTRegexParser#expr}.
 	 * @param ctx the parse tree
@@ -52,12 +75,11 @@ public interface RTRegexVisitor<T> extends ParseTreeVisitor<T> {
 	T visitGSkip(@NotNull RTRegexParser.GSkipContext ctx);
 
 	/**
-	 * Visit a parse tree produced by the {@code gTime}
-	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * Visit a parse tree produced by {@link RTRegexParser#id}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGTime(@NotNull RTRegexParser.GTimeContext ctx);
+	T visitId(@NotNull RTRegexParser.IdContext ctx);
 
 	/**
 	 * Visit a parse tree produced by the {@code gOpt}
@@ -76,12 +98,12 @@ public interface RTRegexVisitor<T> extends ParseTreeVisitor<T> {
 	T visitGCard(@NotNull RTRegexParser.GCardContext ctx);
 
 	/**
-	 * Visit a parse tree produced by the {@code gAlt}
+	 * Visit a parse tree produced by the {@code gDecisionMaking}
 	 * labeled alternative in {@link RTRegexParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGAlt(@NotNull RTRegexParser.GAltContext ctx);
+	T visitGDecisionMaking(@NotNull RTRegexParser.GDecisionMakingContext ctx);
 
 	/**
 	 * Visit a parse tree produced by the {@code printExpr}

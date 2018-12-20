@@ -61,7 +61,9 @@ public abstract class RTContainer extends ElementContainer implements Comparable
 	private Integer cardNumber = 0;
 	private Const cardType = Const.SEQ;
 	private Map <RTContainer, LinkedList<RTContainer>> alternatives;
+	private List<String> decisionMaking;
 	private LinkedList<RTContainer> firstAlternatives;
+	private LinkedList<RTContainer> decisionNodes;
 	private RTContainer trySuccess;
 	private RTContainer tryFailure;
 	private RTContainer tryOriginal;
@@ -79,6 +81,10 @@ public abstract class RTContainer extends ElementContainer implements Comparable
 	
 	public boolean isAlternative(){
 		return !firstAlternatives.isEmpty() || !alternatives.isEmpty();
+	}
+	
+	public boolean isDecisionMaking(){
+		return !decisionMaking.isEmpty();
 	}
 	
 	public boolean isTry(){
@@ -105,6 +111,7 @@ public abstract class RTContainer extends ElementContainer implements Comparable
 		goals = new LinkedList<GoalContainer>();
 		plans = new LinkedList<PlanContainer>();
 		alternatives = new TreeMap<RTContainer,LinkedList<RTContainer>>();
+		decisionMaking = new LinkedList<String>();
 		firstAlternatives = new LinkedList<RTContainer>();	
 		fulfillmentConditions = new ArrayList<String>();
 		adoptionConditions = new ArrayList<String>();
@@ -282,6 +289,22 @@ public abstract class RTContainer extends ElementContainer implements Comparable
 
 	public void setAlternatives(Map<RTContainer, LinkedList<RTContainer>> alternatives) {
 		this.alternatives = alternatives;
+	}
+	
+	public List<String> getDecisionMaking() {
+		return decisionMaking;
+	}
+
+	public void setDecisionMaking(List<String> rtDMGoals) {
+		this.decisionMaking = rtDMGoals;
+	}
+	
+	public LinkedList<RTContainer> getDecisionNodes() {
+		return decisionNodes;
+	}
+
+	public void setDecisionNodes(LinkedList<RTContainer> decisionNodes) {
+		this.decisionNodes = decisionNodes;
 	}
 
 	public String getAltElsId(RTContainer altFirst){

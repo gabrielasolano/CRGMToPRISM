@@ -69,6 +69,45 @@ public class RTRegexBaseListener implements RTRegexListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGTime(@NotNull RTRegexParser.GTimeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGTime(@NotNull RTRegexParser.GTimeContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMultiple(@NotNull RTRegexParser.MultipleContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMultiple(@NotNull RTRegexParser.MultipleContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGAlt(@NotNull RTRegexParser.GAltContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGAlt(@NotNull RTRegexParser.GAltContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterGSkip(@NotNull RTRegexParser.GSkipContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -82,13 +121,13 @@ public class RTRegexBaseListener implements RTRegexListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGTime(@NotNull RTRegexParser.GTimeContext ctx) { }
+	@Override public void enterId(@NotNull RTRegexParser.IdContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGTime(@NotNull RTRegexParser.GTimeContext ctx) { }
+	@Override public void exitId(@NotNull RTRegexParser.IdContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -121,13 +160,13 @@ public class RTRegexBaseListener implements RTRegexListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGAlt(@NotNull RTRegexParser.GAltContext ctx) { }
+	@Override public void enterGDecisionMaking(@NotNull RTRegexParser.GDecisionMakingContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitGAlt(@NotNull RTRegexParser.GAltContext ctx) { }
+	@Override public void exitGDecisionMaking(@NotNull RTRegexParser.GDecisionMakingContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
