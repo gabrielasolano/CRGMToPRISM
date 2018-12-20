@@ -261,6 +261,8 @@ public class RTGoreProducer {
 		if (gc.isDecisionMaking()) {
 			storeDecisionMakingNodes(gc);
 		}
+		
+		if (gc.getClearElId().contains("X")) gc.addFulfillmentConditions("assertion condition " + gc.getClearElId() + " = true");
 	}
 
 	private void iterateGoals(AgentDefinition ad, GoalContainer gc, List<FHardGoal> decList, boolean include) throws IOException{
@@ -407,6 +409,8 @@ public class RTGoreProducer {
 		if (pc.isDecisionMaking()) {
 			storeDecisionMakingNodes(pc);
 		}
+		
+		if (pc.getClearElId().contains("X")) pc.addFulfillmentConditions("assertion trigger " + pc.getClearElId() + " = true");
 	}
 
 	private void storeDecisionMakingNodes(RTContainer pc) {

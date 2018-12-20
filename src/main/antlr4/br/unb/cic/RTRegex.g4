@@ -17,11 +17,13 @@ expr:   expr op=('+'|'#'|'@') FLOAT				# gCard
     |	expr op=(';'|'#') expr					# gTime
     |   SKIPP									# gSkip
     |	t=('G'|'T') id							# gId
-    |	'DM(' multiple ')'						# gDecisionMaking
+    |	'DM(' expr ')'							# gDecisionMaking
+    | 	expr op=',' expr						# gDM
     |   '(' expr ')'							# parens
     ;
 
-multiple:	expr op=',' expr
+multiple:	expr op=',' multiple
+	|		expr
 	;
     
 id:		FLOAT
@@ -30,7 +32,6 @@ id:		FLOAT
 	;
 
 FLOAT		: DIGIT+'.'?DIGIT* 	;
-DM			: 'DM'				;
 SEQ         : ';'				;
 INT			: '#'				;
 C_SEQ		: '+'				;

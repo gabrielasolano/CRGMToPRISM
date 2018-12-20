@@ -18,12 +18,12 @@ public class RTRegexParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		T__7=1, T__6=2, T__5=3, T__4=4, T__3=5, T__2=6, T__1=7, T__0=8, FLOAT=9, 
-		DM=10, SEQ=11, INT=12, C_SEQ=13, C_RTRY=14, ALT=15, TASK=16, GOAL=17, 
-		X=18, SKIPP=19, NEWLINE=20, WS=21;
+		SEQ=10, INT=11, C_SEQ=12, C_RTRY=13, ALT=14, TASK=15, GOAL=16, X=17, SKIPP=18, 
+		NEWLINE=19, WS=20;
 	public static final String[] tokenNames = {
 		"<INVALID>", "'try('", "'opt('", "':'", "'?'", "'DM('", "'('", "')'", 
-		"','", "FLOAT", "'DM'", "';'", "'#'", "'+'", "'@'", "'|'", "'T'", "'G'", 
-		"'X'", "'skip'", "NEWLINE", "WS"
+		"','", "FLOAT", "';'", "'#'", "'+'", "'@'", "'|'", "'T'", "'G'", "'X'", 
+		"'skip'", "NEWLINE", "WS"
 	};
 	public static final int
 		RULE_rt = 0, RULE_expr = 1, RULE_multiple = 2, RULE_id = 3;
@@ -150,6 +150,29 @@ public class RTRegexParser extends Parser {
 		public ExprContext() { }
 		public void copyFrom(ExprContext ctx) {
 			super.copyFrom(ctx);
+		}
+	}
+	public static class GDMContext extends ExprContext {
+		public Token op;
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public GDMContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof RTRegexListener ) ((RTRegexListener)listener).enterGDM(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof RTRegexListener ) ((RTRegexListener)listener).exitGDM(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RTRegexVisitor ) return ((RTRegexVisitor<? extends T>)visitor).visitGDM(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	public static class ParensContext extends ExprContext {
@@ -317,8 +340,8 @@ public class RTRegexParser extends Parser {
 		}
 	}
 	public static class GDecisionMakingContext extends ExprContext {
-		public MultipleContext multiple() {
-			return getRuleContext(MultipleContext.class,0);
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
 		}
 		public GDecisionMakingContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
@@ -409,7 +432,7 @@ public class RTRegexParser extends Parser {
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(30); match(T__3);
-				setState(31); multiple();
+				setState(31); expr(0);
 				setState(32); match(T__1);
 				}
 				break;
@@ -427,7 +450,7 @@ public class RTRegexParser extends Parser {
 				throw new NoViableAltException(this);
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(51);
+			setState(54);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,3,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
@@ -435,16 +458,16 @@ public class RTRegexParser extends Parser {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					setState(49);
+					setState(52);
 					switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
 					case 1:
 						{
 						_localctx = new GAltContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(40);
-						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
+						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
 						setState(41); ((GAltContext)_localctx).op = match(ALT);
-						setState(42); expr(9);
+						setState(42); expr(10);
 						}
 						break;
 
@@ -453,7 +476,7 @@ public class RTRegexParser extends Parser {
 						_localctx = new GTimeContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(43);
-						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
+						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
 						setState(44);
 						((GTimeContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
@@ -461,30 +484,41 @@ public class RTRegexParser extends Parser {
 							((GTimeContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						consume();
-						setState(45); expr(6);
+						setState(45); expr(7);
 						}
 						break;
 
 					case 3:
 						{
-						_localctx = new GCardContext(new ExprContext(_parentctx, _parentState));
+						_localctx = new GDMContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(46);
-						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
-						setState(47);
+						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
+						setState(47); ((GDMContext)_localctx).op = match(T__0);
+						setState(48); expr(3);
+						}
+						break;
+
+					case 4:
+						{
+						_localctx = new GCardContext(new ExprContext(_parentctx, _parentState));
+						pushNewRecursionContext(_localctx, _startState, RULE_expr);
+						setState(49);
+						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
+						setState(50);
 						((GCardContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INT) | (1L << C_SEQ) | (1L << C_RTRY))) != 0)) ) {
 							((GCardContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						consume();
-						setState(48); match(FLOAT);
+						setState(51); match(FLOAT);
 						}
 						break;
 					}
 					} 
 				}
-				setState(53);
+				setState(56);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,3,_ctx);
 			}
@@ -503,11 +537,11 @@ public class RTRegexParser extends Parser {
 
 	public static class MultipleContext extends ParserRuleContext {
 		public Token op;
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
 		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
+		public MultipleContext multiple() {
+			return getRuleContext(MultipleContext.class,0);
 		}
 		public MultipleContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -532,11 +566,23 @@ public class RTRegexParser extends Parser {
 		MultipleContext _localctx = new MultipleContext(_ctx, getState());
 		enterRule(_localctx, 4, RULE_multiple);
 		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(54); expr(0);
-			setState(55); ((MultipleContext)_localctx).op = match(T__0);
-			setState(56); expr(0);
+			setState(62);
+			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(57); expr(0);
+				setState(58); ((MultipleContext)_localctx).op = match(T__0);
+				setState(59); multiple();
+				}
+				break;
+
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(61); expr(0);
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -576,27 +622,27 @@ public class RTRegexParser extends Parser {
 		IdContext _localctx = new IdContext(_ctx, getState());
 		enterRule(_localctx, 6, RULE_id);
 		try {
-			setState(62);
-			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
+			setState(68);
+			switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(58); match(FLOAT);
+				setState(64); match(FLOAT);
 				}
 				break;
 
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(59); match(FLOAT);
-				setState(60); match(X);
+				setState(65); match(FLOAT);
+				setState(66); match(X);
 				}
 				break;
 
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(61); match(X);
+				setState(67); match(X);
 				}
 				break;
 			}
@@ -620,35 +666,38 @@ public class RTRegexParser extends Parser {
 	}
 	private boolean expr_sempred(ExprContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 0: return precpred(_ctx, 8);
+		case 0: return precpred(_ctx, 9);
 
-		case 1: return precpred(_ctx, 5);
+		case 1: return precpred(_ctx, 6);
 
-		case 2: return precpred(_ctx, 9);
+		case 2: return precpred(_ctx, 2);
+
+		case 3: return precpred(_ctx, 10);
 		}
 		return true;
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\27C\4\2\t\2\4\3\t"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\26I\4\2\t\2\4\3\t"+
 		"\3\4\4\t\4\4\5\t\5\3\2\3\2\3\2\3\2\5\2\17\n\2\3\3\3\3\3\3\3\3\3\3\3\3"+
 		"\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3"+
-		"\3\5\3)\n\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\7\3\64\n\3\f\3\16\3\67"+
-		"\13\3\3\4\3\4\3\4\3\4\3\5\3\5\3\5\3\5\5\5A\n\5\3\5\2\3\4\6\2\4\6\b\2\5"+
-		"\3\2\22\23\3\2\r\16\3\2\16\20I\2\16\3\2\2\2\4(\3\2\2\2\68\3\2\2\2\b@\3"+
-		"\2\2\2\n\13\5\4\3\2\13\f\7\26\2\2\f\17\3\2\2\2\r\17\7\26\2\2\16\n\3\2"+
-		"\2\2\16\r\3\2\2\2\17\3\3\2\2\2\20\21\b\3\1\2\21\22\7\4\2\2\22\23\5\4\3"+
-		"\2\23\24\7\t\2\2\24)\3\2\2\2\25\26\7\3\2\2\26\27\5\4\3\2\27\30\7\t\2\2"+
-		"\30\31\7\6\2\2\31\32\5\4\3\2\32\33\7\5\2\2\33\34\5\4\3\2\34)\3\2\2\2\35"+
-		")\7\25\2\2\36\37\t\2\2\2\37)\5\b\5\2 !\7\7\2\2!\"\5\6\4\2\"#\7\t\2\2#"+
-		")\3\2\2\2$%\7\b\2\2%&\5\4\3\2&\'\7\t\2\2\')\3\2\2\2(\20\3\2\2\2(\25\3"+
-		"\2\2\2(\35\3\2\2\2(\36\3\2\2\2( \3\2\2\2($\3\2\2\2)\65\3\2\2\2*+\f\n\2"+
-		"\2+,\7\21\2\2,\64\5\4\3\13-.\f\7\2\2./\t\3\2\2/\64\5\4\3\b\60\61\f\13"+
-		"\2\2\61\62\t\4\2\2\62\64\7\13\2\2\63*\3\2\2\2\63-\3\2\2\2\63\60\3\2\2"+
-		"\2\64\67\3\2\2\2\65\63\3\2\2\2\65\66\3\2\2\2\66\5\3\2\2\2\67\65\3\2\2"+
-		"\289\5\4\3\29:\7\n\2\2:;\5\4\3\2;\7\3\2\2\2<A\7\13\2\2=>\7\13\2\2>A\7"+
-		"\24\2\2?A\7\24\2\2@<\3\2\2\2@=\3\2\2\2@?\3\2\2\2A\t\3\2\2\2\7\16(\63\65"+
-		"@";
+		"\3\5\3)\n\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\7\3\67\n\3"+
+		"\f\3\16\3:\13\3\3\4\3\4\3\4\3\4\3\4\5\4A\n\4\3\5\3\5\3\5\3\5\5\5G\n\5"+
+		"\3\5\2\3\4\6\2\4\6\b\2\5\3\2\21\22\3\2\f\r\3\2\r\17Q\2\16\3\2\2\2\4(\3"+
+		"\2\2\2\6@\3\2\2\2\bF\3\2\2\2\n\13\5\4\3\2\13\f\7\25\2\2\f\17\3\2\2\2\r"+
+		"\17\7\25\2\2\16\n\3\2\2\2\16\r\3\2\2\2\17\3\3\2\2\2\20\21\b\3\1\2\21\22"+
+		"\7\4\2\2\22\23\5\4\3\2\23\24\7\t\2\2\24)\3\2\2\2\25\26\7\3\2\2\26\27\5"+
+		"\4\3\2\27\30\7\t\2\2\30\31\7\6\2\2\31\32\5\4\3\2\32\33\7\5\2\2\33\34\5"+
+		"\4\3\2\34)\3\2\2\2\35)\7\24\2\2\36\37\t\2\2\2\37)\5\b\5\2 !\7\7\2\2!\""+
+		"\5\4\3\2\"#\7\t\2\2#)\3\2\2\2$%\7\b\2\2%&\5\4\3\2&\'\7\t\2\2\')\3\2\2"+
+		"\2(\20\3\2\2\2(\25\3\2\2\2(\35\3\2\2\2(\36\3\2\2\2( \3\2\2\2($\3\2\2\2"+
+		")8\3\2\2\2*+\f\13\2\2+,\7\20\2\2,\67\5\4\3\f-.\f\b\2\2./\t\3\2\2/\67\5"+
+		"\4\3\t\60\61\f\4\2\2\61\62\7\n\2\2\62\67\5\4\3\5\63\64\f\f\2\2\64\65\t"+
+		"\4\2\2\65\67\7\13\2\2\66*\3\2\2\2\66-\3\2\2\2\66\60\3\2\2\2\66\63\3\2"+
+		"\2\2\67:\3\2\2\28\66\3\2\2\289\3\2\2\29\5\3\2\2\2:8\3\2\2\2;<\5\4\3\2"+
+		"<=\7\n\2\2=>\5\6\4\2>A\3\2\2\2?A\5\4\3\2@;\3\2\2\2@?\3\2\2\2A\7\3\2\2"+
+		"\2BG\7\13\2\2CD\7\13\2\2DG\7\23\2\2EG\7\23\2\2FB\3\2\2\2FC\3\2\2\2FE\3"+
+		"\2\2\2G\t\3\2\2\2\b\16(\668@F";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

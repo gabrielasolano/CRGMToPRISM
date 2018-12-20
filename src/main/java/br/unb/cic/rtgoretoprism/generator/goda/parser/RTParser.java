@@ -20,12 +20,14 @@ import br.unb.cic.RTRegexLexer;
 import br.unb.cic.RTRegexParser;
 import br.unb.cic.RTRegexParser.GAltContext;
 import br.unb.cic.RTRegexParser.GCardContext;
+import br.unb.cic.RTRegexParser.GDMContext;
 import br.unb.cic.RTRegexParser.GDecisionMakingContext;
 import br.unb.cic.RTRegexParser.GIdContext;
 import br.unb.cic.RTRegexParser.GOptContext;
 import br.unb.cic.RTRegexParser.GSkipContext;
 import br.unb.cic.RTRegexParser.GTimeContext;
 import br.unb.cic.RTRegexParser.GTryContext;
+import br.unb.cic.RTRegexParser.MultipleContext;
 import br.unb.cic.RTRegexParser.ParensContext;
 import br.unb.cic.RTRegexParser.PrintExprContext;
 import br.unb.cic.rtgoretoprism.model.kl.Const;
@@ -257,11 +259,11 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 
 		return gId;
 	}
-	
+
 	@Override
-	public String visitGDecisionMaking(GDecisionMakingContext ctx) {
-		String gidAo = super.visit(ctx.multiple().expr(0));
-		String gidBo = super.visit(ctx.multiple().expr(1));
+	public String visitGDM(GDMContext ctx) {
+		String gidAo = super.visit(ctx.expr(0));
+		String gidBo = super.visit(ctx.expr(1));
 		
 		String paramFormulaAo = gidAo.replaceAll("\\.", "_");
 		String paramCostAo = paramFormulaAo;
@@ -276,7 +278,6 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		String [] gidAs = gidAo.split("-");
 		String [] gidBs = gidBo.split("-");		
 		String [] gids = new String[gidAs.length + gidBs.length];
-
 		int i = 0;
 		for(String gidB : gidBs){
 			Boolean [] pathTimeB = timeMemory.get(gidB);			
@@ -306,6 +307,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 
 		return gidAo + '-' + gidBo;
 	}
+
 
 	@Override
 	public String visitGCard(GCardContext ctx) {		

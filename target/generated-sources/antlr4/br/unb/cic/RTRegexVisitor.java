@@ -67,6 +67,14 @@ public interface RTRegexVisitor<T> extends ParseTreeVisitor<T> {
 	T visitGAlt(@NotNull RTRegexParser.GAltContext ctx);
 
 	/**
+	 * Visit a parse tree produced by the {@code gDM}
+	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGDM(@NotNull RTRegexParser.GDMContext ctx);
+
+	/**
 	 * Visit a parse tree produced by the {@code gSkip}
 	 * labeled alternative in {@link RTRegexParser#expr}.
 	 * @param ctx the parse tree

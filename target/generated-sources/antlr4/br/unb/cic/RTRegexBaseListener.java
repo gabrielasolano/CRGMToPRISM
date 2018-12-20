@@ -108,6 +108,19 @@ public class RTRegexBaseListener implements RTRegexListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGDM(@NotNull RTRegexParser.GDMContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGDM(@NotNull RTRegexParser.GDMContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterGSkip(@NotNull RTRegexParser.GSkipContext ctx) { }
 	/**
 	 * {@inheritDoc}

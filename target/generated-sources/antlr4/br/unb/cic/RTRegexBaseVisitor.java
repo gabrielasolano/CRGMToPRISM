@@ -74,6 +74,14 @@ public class RTRegexBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitGDM(@NotNull RTRegexParser.GDMContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitGSkip(@NotNull RTRegexParser.GSkipContext ctx) { return visitChildren(ctx); }
 
 	/**

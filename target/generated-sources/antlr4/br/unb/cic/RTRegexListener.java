@@ -98,6 +98,19 @@ public interface RTRegexListener extends ParseTreeListener {
 	void exitGAlt(@NotNull RTRegexParser.GAltContext ctx);
 
 	/**
+	 * Enter a parse tree produced by the {@code gDM}
+	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterGDM(@NotNull RTRegexParser.GDMContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code gDM}
+	 * labeled alternative in {@link RTRegexParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitGDM(@NotNull RTRegexParser.GDMContext ctx);
+
+	/**
 	 * Enter a parse tree produced by the {@code gSkip}
 	 * labeled alternative in {@link RTRegexParser#expr}.
 	 * @param ctx the parse tree
