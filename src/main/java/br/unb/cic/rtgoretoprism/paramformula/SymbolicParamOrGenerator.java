@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SymbolicParamOrGenerator {
+	
+	private int IDX = 1000;
 
 	public String getSequentialOrCost(String[] nodes) {
 		
@@ -97,6 +99,8 @@ public class SymbolicParamOrGenerator {
 
 	private int getId(String node) {
 		int id;
+		
+		if (node.contains("X")) return IDX;
 		if (node.contains("_")) {
 			int last = node.lastIndexOf("_");
 			id = Integer.parseInt(node.substring(last+1, node.length()));

@@ -262,7 +262,17 @@ public class RTGoreProducer {
 			storeDecisionMakingNodes(gc);
 		}
 		
-		if (gc.getClearElId().contains("X")) gc.addFulfillmentConditions("assertion condition " + gc.getClearElId() + " = true");
+		if (gc.getClearElId().contains("X")) {
+			String fulfillment = "assertion condition " + gc.getClearElId() + " = true";
+			gc.addFulfillmentConditions(fulfillment);
+			PlanContainer unknownPlan = new PlanContainer(gc, fulfillment);
+			unknownPlan.setElId("TX");
+			unknownPlan.setTimePath(gc.getTimePath());
+			unknownPlan.setTimeSlot(gc.getTimeSlot());
+			unknownPlan.setPrevTimePath(gc.getPrevTimePath());
+			unknownPlan.setFutTimePath(gc.getFutTimePath());
+			gc.addMERealPlan(unknownPlan);
+		}
 	}
 
 	private void iterateGoals(AgentDefinition ad, GoalContainer gc, List<FHardGoal> decList, boolean include) throws IOException{

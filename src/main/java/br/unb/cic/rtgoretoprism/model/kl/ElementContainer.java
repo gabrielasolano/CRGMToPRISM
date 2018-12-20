@@ -69,6 +69,10 @@ public class ElementContainer {
 		contributions = new Hashtable<SoftgoalContainer, String>();
 	}
 
+	public ElementContainer() {
+		contributions = new Hashtable<SoftgoalContainer, String>();
+	}
+
 	/**
 	 * Get the name of the contained element
 	 *  

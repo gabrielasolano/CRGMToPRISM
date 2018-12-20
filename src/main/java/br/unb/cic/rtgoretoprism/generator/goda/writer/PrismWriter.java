@@ -468,7 +468,8 @@ public class PrismWriter {
 	
 			for (String ctxCondition : plan.getFulfillmentConditions()){
 				Object [] parsedCtxs = CtxParser.parseRegex(ctxCondition);
-				if ((CtxSymbols) parsedCtxs[2] == CtxSymbols.COND) goalContext = true; 
+				if (((CtxSymbols) parsedCtxs[2] == CtxSymbols.COND) || (plan.getClearElId().contains("X"))) 
+					goalContext = true; 
 			}
 			
 			String ctx = getContextsInfo(plan).toString();
@@ -608,15 +609,13 @@ public class PrismWriter {
 		}else{
 			//And/OR
 			if(contextPresent){
+				String ctxId = getContextId(plan);
 				if (nonDeterminismCtx) {
-					String ctxId = getContextId(plan);
-					String pattern = ctxSkipPattern;
-					pattern = pattern.replace("$CTX_GID$", "CTX_" + ctxId);
-					sbType.append(pattern);
+					sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));
 				}
 				else {
 					sbHeader.append(getContextHeader(plan));
-					if (goalContext) sbType.append(ctxSkipPattern);
+					if (goalContext) sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));
 					else sbType.append(ctxFailPattern);
 				}
 			}
@@ -798,8 +797,7 @@ public class PrismWriter {
 		StringBuilder sb = new StringBuilder();		
 		for(String ctxCondition : plan.getFulfillmentConditions()) {
 			Object [] parsedCtxs = CtxParser.parseRegex(ctxCondition);
-			if((CtxSymbols)parsedCtxs[2] == CtxSymbols.COND || nonDeterminismCtx){
-				//sb.append(sb.length() > 0 ? " | " : "").append("CTX_" + plan.getClearElId() + "=0");
+			if((CtxSymbols)parsedCtxs[2] == CtxSymbols.COND || nonDeterminismCtx || plan.getClearElId().contains("X")){
 				sb.append(sb.length() > 0 ? " | " : "").append("CTX_" + getContextId(plan) + "=0");
 			}
 		}

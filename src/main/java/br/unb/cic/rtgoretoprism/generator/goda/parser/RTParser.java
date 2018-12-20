@@ -301,9 +301,9 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		reliabilityFormula = "(-1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
 				+ paramFormulaAo + " + " + paramFormulaBo + " )";
 		
-		/*SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
+		SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
 		costFormula = "( " + paramCostAo + " + " + paramCostBo + " )";
-		costFormula = param.getSequentialOrCost(gids);*/
+		costFormula = param.getSequentialOrCost(gids);
 
 		return gidAo + '-' + gidBo;
 	}

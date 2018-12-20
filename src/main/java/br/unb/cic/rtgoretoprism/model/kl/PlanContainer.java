@@ -33,6 +33,7 @@ package br.unb.cic.rtgoretoprism.model.kl;
 import it.itc.sra.taom4e.model.core.informalcore.formalcore.FPlan;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A container for plan element
@@ -58,6 +59,18 @@ public class PlanContainer extends RTContainer{
 		meGoals = new ArrayList<GoalContainer>();
 		parentlist = new ArrayList<PlanContainer>();	
 		this.addFulfillmentConditions(p.getCreationProperty());
+	}
+
+	public PlanContainer(GoalContainer gc, String fulfillment) {
+		super();
+		
+		meGoals = new ArrayList<GoalContainer>();
+		meGoals.add(gc);
+		parentlist = null;
+		
+		List<String> list = new ArrayList<String>();
+		list.add(fulfillment);
+		this.addFulfillmentConditions(list);
 	}
 
 	/**

@@ -117,6 +117,18 @@ public abstract class RTContainer extends ElementContainer implements Comparable
 		adoptionConditions = new ArrayList<String>();
 	}
 	
+	public RTContainer() {
+		super();
+		
+		goals = new LinkedList<GoalContainer>();
+		plans = new LinkedList<PlanContainer>();
+		alternatives = new TreeMap<RTContainer,LinkedList<RTContainer>>();
+		decisionMaking = new LinkedList<String>();
+		firstAlternatives = new LinkedList<RTContainer>();	
+		fulfillmentConditions = new ArrayList<String>();
+		adoptionConditions = new ArrayList<String>();
+	}
+
 	/**
 	 * @return Returns the goals.
 	 */
