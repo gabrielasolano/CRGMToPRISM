@@ -638,6 +638,7 @@ public class RTGoreProducer {
 				String [] tryGoals = rtTryGoals.get(elId);
 				if(tryGoals[0] != null){
 					RTContainer successPlan = gc.getDecompElement(tryGoals[0]);
+					successPlan.setTimeSlot(gc.getTimeSlot());
 					LinkedList<RTContainer> decSucessPlans = RTContainer.fowardMeansEnd(successPlan, new LinkedList<RTContainer>());
 					for(RTContainer decPlan : decPlans){
 						decPlan.setTrySuccess(successPlan);
@@ -649,6 +650,7 @@ public class RTGoreProducer {
 				}
 				if(tryGoals[1] != null){
 					RTContainer failurePlan = gc.getDecompElement(tryGoals[1]);
+					failurePlan.setTimeSlot(gc.getTimeSlot());
 					LinkedList<RTContainer> decFailurePlans = RTContainer.fowardMeansEnd(failurePlan, new LinkedList<RTContainer>());
 					for(RTContainer decPlan : decPlans){
 						decPlan.setTryFailure(failurePlan);

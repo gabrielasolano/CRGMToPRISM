@@ -78,7 +78,7 @@ public class SymbolicParamOrGenerator {
         	}
         	
         	for (String cost : costs) {
-        		formula.append(prefix + " * " + cost);
+        		formula.append(prefix + cost + " ");
         	}
         }
         return formula;

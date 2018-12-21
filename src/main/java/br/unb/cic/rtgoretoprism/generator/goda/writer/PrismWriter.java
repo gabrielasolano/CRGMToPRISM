@@ -504,7 +504,11 @@ public class PrismWriter {
 				intlCardPattern = intlCardPattern.replace("$SEQ_RENAMES$", seqRenames);
 				planModule = intlCardPattern.replace(MODULE_NAME_TAG, plan.getClearElName());
 			}
-		}else
+		} else if (plan.getTrySuccess() != null || plan.getTryFailure() != null) {
+			singlePattern = new String(tryDecPattern);
+			planModule = singlePattern.replace(MODULE_NAME_TAG, plan.getClearElName());
+		}
+		else
 			planModule = singlePattern.replace(MODULE_NAME_TAG, plan.getClearElName());
 	
 		StringBuilder sbHeader = new StringBuilder();
@@ -516,7 +520,6 @@ public class PrismWriter {
 			if(plan.getTryOriginal() != null || plan.getTrySuccess() != null || plan.getTryFailure() != null){
 				if(plan.getTrySuccess() != null || plan.getTryFailure() != null){
 					//Try					
-					singlePattern = new String(tryDecPattern);
 					if(plan.getAlternatives().isEmpty() && plan.getFirstAlternatives().isEmpty()){
 						if(contextPresent){
 							sbHeader.append(getContextHeader(plan));
@@ -641,7 +644,7 @@ public class PrismWriter {
 		if(plan.getCardType().equals(Const.SEQ))
 			timeSlot -= plan.getCardNumber() - 1; 
 		for(int i = plan.getCardNumber(); i >= 0; i--){
-			planModule = planModule.replace(PREV_TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (timeSlot - 1 + i) + "");
+			planModule = planModule.replace(PREV_TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (timeSlot -1 + i) + "");
 			planModule = planModule.replace(TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (timeSlot + i) + "");
 		}
 	
