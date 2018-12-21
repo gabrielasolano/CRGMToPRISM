@@ -115,6 +115,7 @@ public class PrismWriter {
 	private String xorDecHeaderPattern;
 	private String xorNotSkippedPattern;
 	private String seqRenamePattern;
+	private String tryDecPattern;
 	private String trySDecPattern;
 	private String tryFDecPattern;
 	private String optDecPattern;
@@ -215,6 +216,7 @@ public class PrismWriter {
 		xorDecHeaderPattern 			= ManageWriter.readFileAsString(input + "pattern_xor_header.nm");
 		xorNotSkippedPattern	 		= ManageWriter.readFileAsString(input + "pattern_skip_not_xor.nm");
 		seqRenamePattern				= ManageWriter.readFileAsString(input + "pattern_seq_rename.nm");
+		tryDecPattern					= ManageWriter.readFileAsString(input + "pattern_try.nm");
 		trySDecPattern	 				= ManageWriter.readFileAsString(input + "pattern_try_success.nm");
 		tryFDecPattern	 				= ManageWriter.readFileAsString(input + "pattern_try_fail.nm");
 		optDecPattern 					= ManageWriter.readFileAsString(input + "pattern_opt.nm");
@@ -350,11 +352,11 @@ public class PrismWriter {
         	//cria a linha de transição não-determinística (sucesso: estado nextState);
         	String ndBodyPattern = new String(this.ndBodyPattern);
         	ndBodyPattern = ndBodyPattern.replace("$N$", Integer.toString(this.nonDeterminismCtxId));
-        	ndBodyPattern = ndBodyPattern.replace("$NEXT_STATE$", Integer.toString(nextState));
+        	ndBodyPattern = ndBodyPattern.replace("$NEXT_STATE$", Integer.toString(nextState+1));
         	
-        	String ndBodyAux = "\t[] s$GID$ = $N$ -> (s$GID$'=$MAX_ND$)$CONTEXT_UPDATE$;\n";
-        	ndBodyAux = ndBodyAux.replace("$N$", Integer.toString(this.nonDeterminismCtxId));
+        	String ndBodyAux = "\t[] s$GID$ = $NEXT_STATE$ -> (s$GID$'=$MAX_ND$)$CONTEXT_UPDATE$;\n";
         	ndBodyAux = ndBodyAux.replace("$CONTEXT_UPDATE$", contextUpdate);
+        	ndBodyAux = ndBodyAux.replace("$NEXT_STATE$", Integer.toString(nextState+1));
         	sbTypeAux = sbTypeAux.concat(ndBodyAux);
         	
         	if (sbType.length() == 0) sbType.append(ndBodyPattern);
@@ -364,9 +366,9 @@ public class PrismWriter {
         	nextState++;
         }        
         sbHeader.append(sbHeaderAux);
-        sbTypeAux = sbTypeAux.replace("$MAX_ND$", Integer.toString(nextState));
+        sbTypeAux = sbTypeAux.replace("$MAX_ND$", Integer.toString(nextState+1));
 
-        singlePattern = singlePattern.replace("$MAX_ND$", Integer.toString(nextState));
+        singlePattern = singlePattern.replace("$MAX_ND$", Integer.toString(nextState+1));
         singlePattern = singlePattern.replace("$FINAL_TYPE$", sbTypeAux);
         singlePattern = singlePattern.replace(DEC_HEADER_TAG, sbHeader.toString());
         singlePattern = singlePattern.replace(DEC_TYPE_TAG, sbType.toString());
@@ -379,8 +381,8 @@ public class PrismWriter {
     	if(root.getCardType().equals(Const.SEQ))
     		timeSlot -= root.getCardNumber() - 1; 
     	for(int i = root.getCardNumber(); i >= 0; i--){
-    		singlePattern = singlePattern.replace(PREV_TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", prevTimePath + "_" + (timeSlot - 1 + i) + "");
-    		singlePattern = singlePattern.replace(TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", timePath + "_" + (timeSlot + i) + "");
+    		singlePattern = singlePattern.replace(PREV_TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (timeSlot - 1 + i) + "");
+    		singlePattern = singlePattern.replace(TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (timeSlot + i) + "");
     	}
         
         planModules = planModules.append(singlePattern+"\n");
@@ -443,6 +445,7 @@ public class PrismWriter {
 				andDecPattern = new String(this.andDecPattern),
 				xorDecPattern = new String(this.xorDecPattern),
 				xorDecHeaderPattern = new String(this.xorDecHeaderPattern),
+				tryDecPattern = new String(this.tryDecPattern),
 				trySDecPattern = new String(this.trySDecPattern),
 				tryFDecPattern = new String(this.tryFDecPattern),
 				optHeaderPattern = new String(this.optHeaderPattern),
@@ -513,6 +516,7 @@ public class PrismWriter {
 			if(plan.getTryOriginal() != null || plan.getTrySuccess() != null || plan.getTryFailure() != null){
 				if(plan.getTrySuccess() != null || plan.getTryFailure() != null){
 					//Try					
+					singlePattern = new String(tryDecPattern);
 					if(plan.getAlternatives().isEmpty() && plan.getFirstAlternatives().isEmpty()){
 						if(contextPresent){
 							sbHeader.append(getContextHeader(plan));
@@ -637,8 +641,8 @@ public class PrismWriter {
 		if(plan.getCardType().equals(Const.SEQ))
 			timeSlot -= plan.getCardNumber() - 1; 
 		for(int i = plan.getCardNumber(); i >= 0; i--){
-			planModule = planModule.replace(PREV_TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", prevTimePath + "_" + (timeSlot - 1 + i) + "");
-			planModule = planModule.replace(TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", timePath + "_" + (timeSlot + i) + "");
+			planModule = planModule.replace(PREV_TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (timeSlot - 1 + i) + "");
+			planModule = planModule.replace(TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (timeSlot + i) + "");
 		}
 	
 		//GID

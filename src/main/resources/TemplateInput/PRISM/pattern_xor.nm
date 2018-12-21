@@ -1,1 +1,1 @@
-[success$PREV_TIME_SLOT$] s$GID$ = 0 -> $NOT_SKIPPED$ : (s$GID$'=1) + $SKIPPED$ : (s$GID$'=3);//init to running or skip
+[next$PREV_TIME_SLOT$] s$GID$ = 0 -> $NOT_SKIPPED$ : (s$GID$'=1) + $SKIPPED$ : (s$GID$'=3);//init to running or skip
