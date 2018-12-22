@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -85,11 +86,79 @@ public class PARAMProducer {
 			nodeForm = replaceReliabilites(nodeForm);
 		}
 		
+		if (nodeForm.contains("CTX_"))
+			nodeForm = cleanMultipleContexts(nodeForm);
+		
 		nodeForm = nodeForm.replaceAll("\\s+", "");
 		nodeForm = nodeForm.replaceAll("\\+1", " +1");
 		nodeForm = nodeForm.replaceAll("-1", " -1");
 		nodeForm = nodeForm.replaceAll("\\+(?!1)", " + ");
 		nodeForm = nodeForm.replaceAll("-(?!1)", " - ");
+		
+		
+		
+		return nodeForm;
+	}
+
+	private String cleanMultipleContexts(String nodeForm) {
+		
+		String[] plusSignalSplit = nodeForm.split("\\+");
+		
+		for (String exp1 : plusSignalSplit) {
+			String[] minusSignalSplit = exp1.split("-");
+			for (String exp2 : minusSignalSplit) {
+				String aux = exp2.replaceAll("\\(","");
+				aux = aux.replaceAll("\\)","");
+				aux = aux.trim();
+				if (!aux.equals("1")) {
+					String[] multSignalSplit = exp2.split("\\*");
+					nodeForm = replaceCtxRepetition(nodeForm, multSignalSplit);
+				}
+			}
+		}
+		
+		return nodeForm;
+	}
+
+	private String replaceCtxRepetition(String nodeForm, String[] multSignalSplit) {
+		Set<String> lump = new HashSet<String>();
+		String withoutRepetition = new String();
+		String withRepetition = new String();
+		boolean isZero = false;
+		 
+		for (String i : multSignalSplit) {
+			
+			if (i.contains("/")) {
+				i = i.substring(0, i.indexOf("/")-1);
+			}
+			
+			i = i.replaceAll("\\(", "");
+			i = i.replaceAll("\\)", "");
+
+			if (withRepetition.isEmpty()) withRepetition = i;
+			else withRepetition = withRepetition + "\\*" + i;
+
+			i = i.trim();
+
+			if (!lump.contains(i)) {
+				lump.add(i);
+				if (!i.equals("1")) {
+					if (withoutRepetition.isEmpty()) withoutRepetition = i;
+					else withoutRepetition = withoutRepetition + "*" + i;
+				}
+				if (i.equals("0")) isZero = true;
+		    }
+		}
+		
+		if (isZero) {
+			withRepetition = "\\+" + withRepetition;
+			nodeForm = nodeForm.replaceAll(withRepetition, "");
+			withRepetition = withRepetition.substring(1,withRepetition.length());
+			withRepetition = "-" + withRepetition;
+			nodeForm = nodeForm.replaceAll(withRepetition, "");
+			return nodeForm;
+		}
+		nodeForm = nodeForm.replaceAll(withRepetition, withoutRepetition);
 		return nodeForm;
 	}
 
@@ -229,15 +298,17 @@ public class PARAMProducer {
 				nodeForm = getCostFormula(rootNode);
 			}
 
-			if (!ctxAnnot.isEmpty()) {
+			if (!ctxAnnot.isEmpty() && !nodeForm.equals("0")) {
 				nodeForm = insertCtxAnnotation(nodeForm, ctxAnnot, nodeId);
-				if (rootNode.isAlternative()) {
-					removeXor(nodeId);
-				}
+				if (rootNode.isAlternative())
+					removeXorOpt(nodeId, "XOR");
+				if (rootNode.isOptional())
+					removeXorOpt(nodeId, "OPT");
 			}	
 		}
 
 		if (reliability) this.reliabilityByNode.put(nodeId, nodeForm);
+
 		return nodeForm;
 	}
 
@@ -252,11 +323,11 @@ public class PARAMProducer {
 		return "0";
 	}
 
-	/*Remove XOR parameter from the symbolic formula*/
-	private void removeXor(String nodeId) {
+	/*Remove XOR or OPT parameter from the symbolic formula*/
+	private void removeXorOpt(String nodeId, String xorOpt) {
 		List<String> opt_formula_aux = new ArrayList<String>();
 		for (String xor : this.opts_formula) {
-			String id = xor.replaceAll("XOR_", "");
+			String id = xor.replaceAll(xorOpt + "_", "");
 			if (!nodeId.equals(id)) {
 				opt_formula_aux.add(xor);
 			}
@@ -318,10 +389,15 @@ public class PARAMProducer {
 			nodeForm = nodeForm.replaceAll(subNodeId, subNodeForm);
 		}
 		
-		/*if (nodeForm.contains(" R_")) {
-			nodeForm = nodeForm.replaceAll(" R_", " rTask");
-		}*/
-
+		if (subNodeForm.contains("CTX") && nodeForm.contains("XOR")) {
+			for (Map.Entry<String, String> entry : ctxInformation.entrySet())
+			{
+				if (entry.getKey().contains(subNodeId.trim())) {
+					nodeForm = nodeForm.replaceAll("XOR_" + subNodeId.trim(), entry.getKey());
+					return nodeForm;
+				}
+			}
+		}
 		return nodeForm;
 	}
 
@@ -335,7 +411,7 @@ public class PARAMProducer {
 			return uid;
 		}
 
-		Object [] res = RTParser.parseRegex(uid, rtAnnot + '\n', decType);
+		Object [] res = RTParser.parseRegex(uid, rtAnnot + '\n', decType, true);
 
 		checkOptXorDeclaration((String) res[5]);
 

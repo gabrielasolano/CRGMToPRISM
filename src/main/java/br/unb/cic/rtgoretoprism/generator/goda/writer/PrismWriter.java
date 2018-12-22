@@ -333,7 +333,7 @@ public class PrismWriter {
         	ndHeaderPattern = ndHeaderPattern.replace("$N$", Integer.toString(this.nonDeterminismCtxId));
         	sbHeader.append(ndHeaderPattern + " //");
         	
-        	//comenta os contextos envolvidos
+        	//Add comment of contexts
         	contextUpdate = new String();
         	for (Map.Entry<String, String> entry : mapContexts.entrySet()) {
         		String global = "global CTX_" + entry.getKey()+ ": [0..1] init 0;\n";
@@ -342,14 +342,14 @@ public class PrismWriter {
         		for (int i = 0; i < ctxCombination.length; i++) {
         			if (ctxCombination[i].equals(entry.getKey())) {
             			sbHeader.append(" " + entry.getValue() + " &");
-            			//gravo os contextos que vão ser setados
+            			//Save contexts to be inserted
             			contextUpdate = contextUpdate.concat(" & (CTX_" + entry.getKey() + "'=1)");
             		}
         		}
         	}
         	sbHeader.replace(sbHeader.length()-1, sbHeader.length(), "\n");
         	
-        	//cria a linha de transição não-determinística (sucesso: estado nextState);
+        	//Build the body of the module
         	String ndBodyPattern = new String(this.ndBodyPattern);
         	ndBodyPattern = ndBodyPattern.replace("$N$", Integer.toString(this.nonDeterminismCtxId));
         	ndBodyPattern = ndBodyPattern.replace("$NEXT_STATE$", Integer.toString(nextState+1));

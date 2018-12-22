@@ -39,7 +39,7 @@ import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamOrGenerator;
 
 public class RTParser{
 
-	public static Object[] parseRegex(String uid, String regex, Const decType) throws IOException{
+	public static Object[] parseRegex(String uid, String regex, Const decType, boolean param) throws IOException{
 		//Reading the DSL script
 		InputStream is = new ByteArrayInputStream(regex.getBytes("UTF-8"));
 
@@ -73,7 +73,7 @@ public class RTParser{
 		//walker.walk(new MyRTRegexBaseListener(), parser.prog());
 
 		ParseTree tree = parser.rt();
-		CustomRTRegexVisitor rtRegexVisitor = new CustomRTRegexVisitor(uid, decType);
+		CustomRTRegexVisitor rtRegexVisitor = new CustomRTRegexVisitor(uid, decType, param);
 		rtRegexVisitor.visit(tree);
 
 		return new Object [] 	{rtRegexVisitor.timeMemory, 
@@ -91,6 +91,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 
 	final String uid;
 	final Const decType;
+	final boolean param;
 	String reliabilityFormula = new String();
 	String costFormula = new String();
 	Map<String, Boolean[]> timeMemory = new HashMap<String, Boolean[]>();		
@@ -100,8 +101,9 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 	Map<String, Boolean> optMemory = new HashMap<String, Boolean>();
 	List<String> decisionMemory = new ArrayList<String>();
 
-	public CustomRTRegexVisitor(String uid, Const decType) {
+	public CustomRTRegexVisitor(String uid, Const decType, boolean param) {
 		this.decType = decType;
+		this.param = param;
 
 		if (uid.contains("_")) {
 			this.uid = uid.substring(0, uid.indexOf('_'));
@@ -181,26 +183,28 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 			i++; 
 		}
 
-		if (decType.equals(Const.AND)) {
-			reliabilityFormula = "( " + paramFormulaAo + " * " + paramFormulaBo + " )";
-			SymbolicParamAndGenerator param = new SymbolicParamAndGenerator();
-			if (ctx.op.getType() == RTRegexParser.SEQ) {
-				costFormula = param.getSequentialAndCost(gids);
+		if (param) {
+			if (decType.equals(Const.AND)) {
+				reliabilityFormula = "( " + paramFormulaAo + " * " + paramFormulaBo + " )";
+				SymbolicParamAndGenerator param = new SymbolicParamAndGenerator();
+				if (ctx.op.getType() == RTRegexParser.SEQ) {
+					costFormula = param.getSequentialAndCost(gids);
+				}
+				else {
+					costFormula = param.getParallelAndCost(gids);
+				}
 			}
-			else {
-				costFormula = param.getParallelAndCost(gids);
-			}
-		}
-		else if (decType.equals(Const.OR)) {
-			//paramFormula = "(MAX( " + paramFormulaAo + " , " + paramFormulaBo + " ))";
-			reliabilityFormula = "(-1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
-					+ paramFormulaAo + " + " + paramFormulaBo + " )";
-			SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
-			if (ctx.op.getType() == RTRegexParser.INT) {
-				costFormula = "( " + paramCostAo + " + " + paramCostBo + " )";
-			}
-			else {
-				costFormula = param.getSequentialOrCost(gids);
+			else if (decType.equals(Const.OR)) {
+				//paramFormula = "(MAX( " + paramFormulaAo + " , " + paramFormulaBo + " ))";
+				reliabilityFormula = "( -1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
+						+ paramFormulaAo + " + " + paramFormulaBo + " )";
+				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
+				if (ctx.op.getType() == RTRegexParser.INT) {
+					costFormula = "( " + paramCostAo + " + " + paramCostBo + " )";
+				}
+				else {
+					costFormula = param.getSequentialOrCost(gids);
+				}
 			}
 		}
 		return gidAo + '-' + gidBo;
@@ -230,10 +234,11 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 			i++;
 		}
 
-		SymbolicParamAltGenerator param = new SymbolicParamAltGenerator();
-		reliabilityFormula = param.getAlternativeFormula(gids, true);
-		costFormula = param.getAlternativeFormula(gids, false);
-
+		if (param) {
+			SymbolicParamAltGenerator param = new SymbolicParamAltGenerator();
+			reliabilityFormula = param.getAlternativeFormula(gids, true);
+			costFormula = param.getAlternativeFormula(gids, false);
+		}
 		return gidAo + '-' + gidBo;
 	}
 
@@ -251,10 +256,12 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		paramFormulaId = checkNestedRT(paramFormulaId, true);
 		paramCostId = checkNestedRT(paramCostId, false);
 
-		String clearId = gId.replaceAll("\\.", "_");
-		reliabilityFormula = "(OPT_" + clearId + " * " + paramFormulaId
-				+ " - " + "OPT_" + clearId + " + 1)"; 
-		costFormula = "(OPT_" + clearId + " * R_" + clearId + " * " + paramCostId + " )";
+		if (param) {
+			String clearId = gId.replaceAll("\\.", "_");
+			reliabilityFormula = "( OPT_" + clearId + " * " + paramFormulaId
+					+ " - " + "OPT_" + clearId + " + 1 )"; 
+			costFormula = "( OPT_" + clearId + " * R_" + clearId + " * " + paramCostId + " )";
+		}
 		optMemory.put(gId, true);
 
 		return gId;
@@ -292,13 +299,15 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 			i++;
 		}
 		
-		reliabilityFormula = "(-1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
-				+ paramFormulaAo + " + " + paramFormulaBo + " )";
-		
-		SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
-		costFormula = "( R_" + paramCostAo + " * " + paramCostAo + " + R_" + paramCostBo + " * " + paramCostBo + " )";
-		//costFormula = param.getSequentialOrCost(gids);
-
+		if (param) {
+			reliabilityFormula = "( -1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
+					+ paramFormulaAo + " + " + paramFormulaBo + " )";
+			
+			SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
+			if (gids.length <= 4) costFormula = param.getDecisionMakingFormula(gids);
+			else costFormula = "( " + paramCostAo + " * " + paramCostBo + " )";
+			 
+		}
 		return gidAo + '-' + gidBo;
 	}
 
@@ -315,18 +324,24 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		String k = ctx.FLOAT().getText();
 		if(ctx.op.getType() == RTRegexParser.INT) {
 			cardMemory.put(gid, new Object[]{Const.INT,Integer.parseInt(ctx.FLOAT().getText())});
-			reliabilityFormula = "(( " + paramFormulaId + " )^" + k + ")";
-			costFormula = "( " + getMultiplier(k) + " * ( R_" + paramCostId + " )^" + k + " * " + paramCostId + " )";
+			if (param) {
+				reliabilityFormula = "(( " + paramFormulaId + " )^" + k + ")";
+				costFormula = "( " + getMultiplier(k) + " * ( R_" + paramCostId + " )^" + k + " * " + paramCostId + " )";
+			}
 		}
 		else if(ctx.op.getType() == RTRegexParser.C_SEQ) {
 			cardMemory.put(gid, new Object[]{Const.SEQ,Integer.parseInt(ctx.FLOAT().getText())});
-			reliabilityFormula = "(( " + paramFormulaId + " )^" + k + ")";
-			costFormula = "( " + k + " * ( R_" + paramCostId + " )^" + k + " * " + paramCostId + " )";
+			if (param) {
+				reliabilityFormula = "(( " + paramFormulaId + " )^" + k + ")";
+				costFormula = "( " + k + " * ( R_" + paramCostId + " )^" + k + " * " + paramCostId + " )";
+			}
 		}
 		else {
 			cardMemory.put(gid, new Object[]{Const.RTRY,Integer.parseInt(ctx.FLOAT().getText())});
-			k = String.valueOf(Integer.valueOf(k) + 1);
-			reliabilityFormula = "(1 - (1 - " + paramFormulaId + " )^" + k + ")";
+			if (param) {
+				k = String.valueOf(Integer.valueOf(k) + 1);
+				reliabilityFormula = "( 1 - (1 - " + paramFormulaId + " )^" + k + " )";
+			}
 		}	
 		return gid;
 	}
@@ -369,34 +384,35 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 			paramFormulaF = gidF.replaceAll("\\.", "_");
 		}
 		tryMemory.put(gidT, new String[]{gidS, gidF});
-
-		reliabilityFormula = "( " + paramFormulaT + " * " + paramFormulaS
-				+ " - " + paramFormulaT + " * " + paramFormulaF
-				+ " + " + paramFormulaF + " )";
 		
-		if (paramCostS.equals("1")) { //Try (n)? skip : n1
-			costFormula = "( - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostT
-					+ " - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostF
-					+ " + R_" + paramCostT + " * " + paramCostT
-					+ " + R_" + paramCostF + " * " + paramCostT
-					+ " + R_" + paramCostF + " * " + paramCostF + " )";
+		if (param) {
+			reliabilityFormula = "( " + paramFormulaT + " * " + paramFormulaS
+					+ " - " + paramFormulaT + " * " + paramFormulaF
+					+ " + " + paramFormulaF + " )";
+			
+			if (paramCostS.equals("1")) { //Try (n)? skip : n1
+				costFormula = "( - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostT
+						+ " - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostF
+						+ " + R_" + paramCostT + " * " + paramCostT
+						+ " + R_" + paramCostF + " * " + paramCostT
+						+ " + R_" + paramCostF + " * " + paramCostF + " )";
 
+			}
+			else if (paramCostF.equals("1")) { //Try (n) ? n1 : skip
+				costFormula = "( R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostT
+						+ " + R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostS
+						+ " - R_" + paramCostT + " * " + paramCostT
+						+ " + " + paramCostT + " )";
+			}
+			else{ //Try (n)? n1 : n2
+				costFormula = "( R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostT
+						+ " + R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostS
+						+ " - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostT
+						+ " - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostF
+						+ " + R_" + paramCostF + " * " + paramCostT
+						+ " + R_" + paramCostF + " * " + paramCostF + " )";
+			}
 		}
-		else if (paramCostF.equals("1")) { //Try (n) ? n1 : skip
-			costFormula = "( R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostT
-					+ " + R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostS
-					+ " - R_" + paramCostT + " * " + paramCostT
-					+ " + " + paramCostT + " )";
-		}
-		else{ //Try (n)? n1 : n2
-			costFormula = "( R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostT
-					+ " + R_" + paramCostT + " * R_" + paramCostS + " * " + paramCostS
-					+ " - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostT
-					+ " - R_" + paramCostT + " * R_" + paramCostF + " * " + paramCostF
-					+ " + R_" + paramCostF + " * " + paramCostT
-					+ " + R_" + paramCostF + " * " + paramCostF + " )";
-		}
-		
 		return gidT;
 	}
 	

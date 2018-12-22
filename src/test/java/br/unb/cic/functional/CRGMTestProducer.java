@@ -287,7 +287,7 @@ public class CRGMTestProducer{
 	@SuppressWarnings("unchecked")
 	private void storeRegexResults(String uid, String rtRegex, Const decType) throws IOException {
 		if(rtRegex != null){
-			Object [] res = RTParser.parseRegex(uid, rtRegex + '\n', decType);
+			Object [] res = RTParser.parseRegex(uid, rtRegex + '\n', decType, false);
 			rtSortedGoals.putAll((Map<String, Boolean[]>) res [0]);
 			rtCardGoals.putAll((Map<String, Object[]>) res [1]);
 			rtAltGoals.putAll((Map<String, Set<String>>) res [2]);
