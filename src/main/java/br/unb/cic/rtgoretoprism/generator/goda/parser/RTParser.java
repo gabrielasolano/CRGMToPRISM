@@ -200,7 +200,8 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 						+ paramFormulaAo + " + " + paramFormulaBo + " )";
 				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
 				if (ctx.op.getType() == RTRegexParser.INT) {
-					costFormula = "( " + paramCostAo + " + " + paramCostBo + " )";
+					if (gids.length <= 4) costFormula = param.getDecisionMakingFormula(gids);
+					else costFormula = "( " + paramCostAo + " * " + paramCostBo + " )";
 				}
 				else {
 					costFormula = param.getSequentialOrCost(gids);
