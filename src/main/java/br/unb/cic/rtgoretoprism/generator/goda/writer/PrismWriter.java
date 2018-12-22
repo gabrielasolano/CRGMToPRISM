@@ -375,8 +375,8 @@ public class PrismWriter {
         singlePattern = singlePattern.replace(GID_TAG, root.getClearElId());
         
     	//Time
-    	Integer prevTimePath = root.getPrevTimePath();
-    	Integer timePath = root.getTimePath();
+    	//Integer prevTimePath = root.getPrevTimePath();
+    	//Integer timePath = root.getTimePath();
     	Integer timeSlot = root.getTimeSlot()-1;
     	if(root.getCardType().equals(Const.SEQ))
     		timeSlot -= root.getCardNumber() - 1; 
@@ -639,11 +639,14 @@ public class PrismWriter {
 	
 		//Time
 		Integer prevTimePath = plan.getPrevTimePath();
-		Integer timePath = plan.getTimePath();
+		//Integer timePath = plan.getTimePath();
 		Integer timeSlot = plan.getTimeSlot();
-		if(plan.getCardType().equals(Const.SEQ))
+		if(plan.getCardType().equals(Const.SEQ))	
 			timeSlot -= plan.getCardNumber() - 1; 
 		for(int i = plan.getCardNumber(); i >= 0; i--){
+			if (plan.isTryFailure() || plan.isTrySuccess()) {
+				planModule = planModule.replace(PREV_TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (prevTimePath + 1 +i) + "");
+			}
 			planModule = planModule.replace(PREV_TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (timeSlot -1 + i) + "");
 			planModule = planModule.replace(TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (timeSlot + i) + "");
 		}

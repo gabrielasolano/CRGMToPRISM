@@ -280,12 +280,6 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		String [] gids = new String[gidAs.length + gidBs.length];
 		int i = 0;
 		for(String gidB : gidBs){
-			Boolean [] pathTimeB = timeMemory.get(gidB);			
-			//if(ctx.op.getType() == RTRegexParser.INT){
-				//pathTimeB[0] = true;
-			//}else if(ctx.op.getType() == RTRegexParser.SEQ)
-				//pathTimeB[1] = true;
-			
 			for(String gidA : gidAs){
 				if(!decisionMemory.contains(gidA))
 					decisionMemory.add(gidA);
@@ -366,17 +360,12 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		String paramCostF = "1";
 		paramFormulaF = checkNestedRT(paramFormulaF, true);
 		paramCostF = checkNestedRT(paramCostF, false);
-
-		Boolean [] pathTimeS, pathTimeF; 
+ 
 		if(gidS != null){
-			pathTimeS = timeMemory.get(gidS);
-			pathTimeS[1] = pathTimeS[1] = true;
 			paramFormulaS = gidS.replaceAll("\\.", "_");
 		}
 
 		if(gidF != null){
-			pathTimeF = timeMemory.get(gidF);
-			pathTimeF[1] = pathTimeF[1] = true;
 			paramFormulaF = gidF.replaceAll("\\.", "_");
 		}
 		tryMemory.put(gidT, new String[]{gidS, gidF});
