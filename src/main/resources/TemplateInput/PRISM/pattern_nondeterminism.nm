@@ -6,8 +6,9 @@ module NonDeterminism_$GID$
 	[next$PREV_TIME_SLOT$] s$GID$ = 0 -> (s$GID$'= 1);
 
 	$DEC_TYPE$
+	[] s$GID$ = 1 -> (s$GID$'=$MAX_ND$); //no uncertainty holding
 
 $FINAL_TYPE$
-	
-	[next$TIME_SLOT$] s$GID$ =  $MAX_ND$ -> (s$GID$'=$MAX_ND$);
+	 
+	[next$TIME_SLOT$] s$GID$ = $MAX_ND$ -> (s$GID$'=$MAX_ND$);
 endmodule
