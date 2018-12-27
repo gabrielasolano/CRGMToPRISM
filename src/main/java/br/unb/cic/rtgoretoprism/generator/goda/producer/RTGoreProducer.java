@@ -98,9 +98,6 @@ public class RTGoreProducer {
 	Map<String, String[]> rtTryGoals;
 	Map<String, Boolean> rtOptGoals;
 
-	//private int globalTime;
-	//private int globalPath;
-
 	/**
 	 * Creates a new Producer instance
 	 * 
@@ -111,7 +108,6 @@ public class RTGoreProducer {
 	public RTGoreProducer(Set<Actor> allActors, Set<FHardGoal> allGoals, String in, String out, boolean parametric ) {
 
 		tn = new TroposNavigator( allActors.iterator().next().eResource() );
-		//Set<Actor> allActors = getSystemActors();
 
 		this.inputFolder = in;
 		this.outputFolder = out;
@@ -238,9 +234,9 @@ public class RTGoreProducer {
 		else if (tn.isBooleanDecOR(g))
 			// sets decomposition flag and creates the Metagoal+plan (call only one time!)
 			gc.createDecomposition(Const.OR);	
-		
+
 		if (dmRT) gc.setDecisionMaking(this.rtDMGoals);
-		
+
 		iterateGoals(ad, gc, declist, included);
 		iterateRts(gc, gc.getDecompGoals());
 		iterateMeansEnds(g, gc, ad, included);
@@ -257,11 +253,11 @@ public class RTGoreProducer {
 				gc.addDependency(goal, actor);
 			}
 		}
-		
+
 		if (gc.isDecisionMaking()) {
 			storeDecisionMakingNodes(gc);
 		}
-		
+
 		if (gc.getClearElId().contains("X")) {
 			String fulfillment = "assertion condition " + gc.getClearElId() + " = true";
 			gc.addFulfillmentConditions(fulfillment);
@@ -285,74 +281,43 @@ public class RTGoreProducer {
 
 		for (FHardGoal dec : decList) {
 			boolean newgoal = !ad.containsGoal(dec);
-			boolean parDec = false;
-			boolean trivial = false;
-			// addDecomp adds the new goal to container and goalbase and, if needed (OR, M-E)
-			// organizes dispatch goals
+
+			boolean first = false;
+			if (gc.getDecompGoals().isEmpty()) first = true;
+
 			GoalContainer deccont = ad.createGoal(dec, Const.ACHIEVE);
 			gc.addDecomp(deccont);
 
 			if (this.rtDMGoals.contains(deccont.getElId())) {
-				deccont.setPrevTimePath(prevPath);
-				deccont.setFutTimePath(rootFutPath);
-				deccont.setTimePath(rootPath);
-				deccont.setTimeSlot(rootTime+1);
-				parDec = true;
-				trivial = true;
+				deccont.setPrevTimePath(gc.getPrevTimePath()+1);
+				deccont.setFutTimePath(gc.getFutTimePath()+1);
+				deccont.setTimePath(rootPath+1);
+				deccont.setTimeSlot(deccont.getPrevTimePath() + 1);	
+
+				if (!first) deccont.setFutTimePath(rootPath+1);
 			}
-			else if(rtSortedGoals.containsKey(deccont.getElId())){
-				Boolean [] decDeltaPathTime = rtSortedGoals.get(deccont.getElId());				
-				if(decDeltaPathTime[1]){ //|| tn.getBooleanDec(dec, TroposIntentional.class).isEmpty()
-					/*if(gc.getFutTimePath() > 0){
-						deccont.setPrevTimePath(gc.getFutTimePath());
-					}else*/
-					deccont.setPrevTimePath(gc.getTimePath());
-					deccont.setFutTimePath(gc.getFutTimePath());//TODO: a sequential element should receive 'future time' from its predecessor?  
+			else {
+				if (!first) {
+					deccont.setPrevTimePath(gc.getFutTimePath());
+					deccont.setFutTimePath(gc.getFutTimePath()+1);
 					deccont.setTimePath(rootPath);
-					deccont.setTimeSlot(gc.getTimeSlot() + 1);
-				}else if(decDeltaPathTime[0]){
-					if(gc.getFutTimePath() > 0)
-						deccont.setTimePath(gc.getFutTimePath() + 1);
-					else
-						deccont.setTimePath(gc.getTimePath() + 1);					
-					deccont.setTimeSlot(rootTime);
-					parDec = true;
-				}else{
-					trivial = true;
+					deccont.setTimeSlot(deccont.getPrevTimePath() + 1);
+				}
+				else{ 
 					deccont.setPrevTimePath(prevPath);
 					deccont.setFutTimePath(rootFutPath);
 					deccont.setTimePath(rootPath);
-					deccont.setTimeSlot(rootTime);
+					deccont.setTimeSlot(gc.getPrevTimePath()+1);
 				}
-			}else{
-				trivial = true;
-				deccont.setPrevTimePath(prevPath);
-				deccont.setFutTimePath(gc.getFutTimePath());
-				deccont.setTimePath(gc.getTimePath());
-				deccont.setTimeSlot(gc.getTimeSlot());
 			}
-
-			if(rtCardGoals.containsKey(deccont.getElId())){
-				Object[] card = rtCardGoals.get(deccont.getElId());
-				Const cardType = (Const) card[0];
-				Integer cardNumber = (Integer) card[1];
-				deccont.setCardType(cardType);
-				if(cardType.equals(Const.SEQ))
-					deccont.setTimeSlot(deccont.getTimeSlot() + cardNumber - 1);
-			}
-
 			deccont.addFulfillmentConditions(gc.getFulfillmentConditions());
-
 			if (newgoal){
 				addGoal(dec, deccont, ad, include);	
-				gc.setFutTimePath(Math.max(deccont.getTimePath(), deccont.getFutTimePath())); //TODO: gc.getFutTimePath() + ?
-				if(trivial || (!parDec && rtAltGoals.get(deccont.getElId()) == null))
-					gc.setTimeSlot(deccont.getTimeSlot());
-				/*if(trivial || (parDec || rtAltGoals.get(deccont.getElId()) != null))
-						gc.setTimePath(deccont.getTimePath());*/		
-			}				
+				gc.setFutTimePath(Math.max(deccont.getTimeSlot(), deccont.getFutTimePath()));		
+			}	
 		}		
 	}
+
 
 	/**
 	 * @param g
@@ -376,10 +341,6 @@ public class RTGoreProducer {
 	private void addPlan(Plan p, PlanContainer pc, final AgentDefinition ad) throws IOException {
 		addContributions(p, pc, ad);
 
-
-		//Integer prevPath = pc.getPrevTimePath();
-		//Integer rootPath = pc.getTimePath();
-		//Integer rootTime = pc.getTimeSlot();
 		boolean dmRT = false;
 		if (tn.isBooleanDec(p)){
 			dmRT = storeRegexResults(pc.getUid(), pc.getRtRegex(), pc.getDecomposition());
@@ -391,7 +352,7 @@ public class RTGoreProducer {
 		}
 
 		if (dmRT) pc.setDecisionMaking(this.rtDMGoals);
-		
+
 		if (tn.isMeansEndDec(p)){
 			List<FPlan> melist = tn.getMeansEndMeanPlans(p);
 			sortIntentionalElements(melist);
@@ -419,7 +380,7 @@ public class RTGoreProducer {
 		if (pc.isDecisionMaking()) {
 			storeDecisionMakingNodes(pc);
 		}
-		
+
 		if (pc.getClearElId().contains("X")) pc.addFulfillmentConditions("assertion trigger " + pc.getClearElId() + " = true");
 	}
 
@@ -427,7 +388,7 @@ public class RTGoreProducer {
 
 		List<String> idNodes = pc.getDecisionMaking();
 		LinkedList<RTContainer> nodes = new LinkedList<RTContainer>();
-	
+
 		for (String id : idNodes) {
 			nodes.add(pc.getDecompElement(id));
 		}
@@ -439,149 +400,70 @@ public class RTGoreProducer {
 		Integer prevPath = pc.getPrevTimePath();
 		Integer rootFutPath = pc.getFutTimePath();
 		Integer rootPath = pc.getTimePath();
-		Integer rootTime = pc.getTimeSlot();
 		for (FPlan dec : decList) {
 			boolean newplan = !ad.containsPlan(dec);
-			boolean parPlan = false;
+
+			boolean first = false;
+			if (pc.getDecompPlans().isEmpty()) first = true;
 
 			PlanContainer deccont = ad.createPlan(dec);
 			pc.addDecomp(deccont);
 
 			if (this.rtDMGoals.contains(deccont.getElId())) {
-				deccont.setPrevTimePath(prevPath);
-				deccont.setFutTimePath(rootFutPath);
-				deccont.setTimePath(rootPath);
-				deccont.setTimeSlot(rootTime+1);
-				//parPlan = true;
-			}
-			else if(rtSortedGoals.containsKey(deccont.getElId())){
-				Boolean [] decDeltaPathTime = rtSortedGoals.get(deccont.getElId());				
-				if(decDeltaPathTime[1]){
-					/*if(pc.getFutTimePath() > 0)
-						deccont.setPrevTimePath(pc.getFutTimePath());
-					else*/
-					deccont.setPrevTimePath(pc.getTimePath());
-					deccont.setFutTimePath(pc.getFutTimePath());
-					deccont.setTimePath(rootPath);
-					deccont.setTimeSlot(pc.getTimeSlot() + 1);
-				}else if(decDeltaPathTime[0]){
-					if(pc.getFutTimePath() > 0)
-						deccont.setTimePath(pc.getFutTimePath() + 1);
-					else
-						deccont.setTimePath(pc.getTimePath() + 1);
+				deccont.setPrevTimePath(pc.getPrevTimePath()+1);
+				deccont.setFutTimePath(pc.getFutTimePath()+1);
+				deccont.setTimePath(rootPath+1);
+				deccont.setTimeSlot(deccont.getPrevTimePath() + 1);	
 
-					deccont.setTimeSlot(rootTime);
-					parPlan = true;					
+				if (!first) deccont.setFutTimePath(rootPath+1);
+
+			}
+			else { 
+				if (!first) {
+					deccont.setPrevTimePath(pc.getFutTimePath());
+					deccont.setFutTimePath(pc.getFutTimePath()+1);
+					deccont.setTimePath(rootPath);
+					deccont.setTimeSlot(deccont.getPrevTimePath() + 1);
 				}else{
 					deccont.setPrevTimePath(prevPath);
 					deccont.setFutTimePath(rootFutPath);
 					deccont.setTimePath(rootPath);
-					deccont.setTimeSlot(rootTime);
+					deccont.setTimeSlot(prevPath+1);
 				}
-			}else{
-				deccont.setPrevTimePath(prevPath);
-				deccont.setFutTimePath(pc.getFutTimePath());
-				deccont.setTimePath(pc.getTimePath());
-				deccont.setTimeSlot(pc.getTimeSlot());
 			}
-
-			if(rtCardGoals.containsKey(deccont.getElId())){
-				Object[] card = rtCardGoals.get(deccont.getElId());
-				Const cardType = (Const) card[0];
-				Integer cardNumber = (Integer) card[1];
-				if(cardType.equals(Const.SEQ))
-					deccont.setTimeSlot(deccont.getTimeSlot() + cardNumber - 1);
-			}
-
 			deccont.addFulfillmentConditions(pc.getFulfillmentConditions());
-			//deccont.addAdoptionConditions(pc.getAdoptionConditions());
 
 			if (newplan){
 				addPlan(dec, deccont, ad);									
-				pc.setFutTimePath(Math.max(deccont.getTimePath(), deccont.getFutTimePath())); //TODO: why to add pc.getFutTimePath() ?
-				if(!parPlan && rtAltGoals.get(deccont.getElId()) == null){
-					pc.setTimeSlot(deccont.getTimeSlot());
-				}/*else{ 
-					pc.setTimePath(deccont.getTimePath());
-				}*/
+				pc.setFutTimePath(Math.max(deccont.getTimeSlot(), deccont.getFutTimePath())); //TODO: why to add pc.getFutTimePath() ?
 			}
 		}
 	}
 
 	private void iterateMeansEnds(FHardGoal g, GoalContainer gc, final AgentDefinition ad, boolean included) throws IOException{
 
-		Integer prevPath = gc.getPrevTimePath();
-		Integer rootFutPath = gc.getFutTimePath();
-		Integer rootPath = gc.getTimePath();
-		Integer rootTime = gc.getTimeSlot();
 		if (included && tn.isMeansEndDec(g)){
 			List<FPlan> melist = tn.getMeansEndMeanPlans(g);
 			sortIntentionalElements(melist);
-			// sets decomposition flag and creates the Metagoal+plan,
-			// shall be the same than with OR! They could also be mixed in this implementation!
+
 			gc.createDecomposition(Const.ME);
 			for (FPlan p : melist) {
 				boolean newplan = !ad.containsPlan(p);
-				boolean parPlan = false;
-				boolean trivial = false;
 
 				PlanContainer pc = ad.createPlan(p);
 				gc.addMERealPlan(pc);
 
-				if(rtSortedGoals.containsKey(pc.getElId())){
-					Boolean [] decDeltaPathTime = rtSortedGoals.get(pc.getElId());										
-					if(decDeltaPathTime[1]){
-						/*if(gc.getFutTimePath() > 0)
-							pc.setPrevTimePath(gc.getFutTimePath());
-						else*/
-						pc.setPrevTimePath(gc.getTimePath());
-						pc.setFutTimePath(gc.getFutTimePath());
-						pc.setTimePath(rootPath);
-						pc.setTimeSlot(gc.getTimeSlot() + 1);
-					}else if(decDeltaPathTime[0]){
-						parPlan = true;
-						pc.setPrevTimePath(prevPath);
-						if(gc.getFutTimePath() > 0)
-							pc.setTimePath(gc.getFutTimePath() + 1);
-						else
-							pc.setTimePath(gc.getTimePath() + 1);
-						pc.setTimeSlot(rootTime + 0);//TODO: check if there is no case in which both path and time are incremented
-					}else{
-						trivial = true;
-						pc.setPrevTimePath(prevPath);
-						pc.setFutTimePath(rootFutPath);
-						pc.setTimePath(rootPath);
-						pc.setTimeSlot(rootTime);
-					}
-				}else{
-					trivial = true;
-					//parPlan = true;
-					pc.setPrevTimePath(gc.getPrevTimePath());
-					pc.setFutTimePath(gc.getFutTimePath());
-					pc.setTimePath(gc.getTimePath());
-					pc.setTimeSlot(gc.getTimeSlot());
-				}
-
-				if(rtCardGoals.containsKey(pc.getElId())){
-					Object[] card = rtCardGoals.get(pc.getElId());
-					Const cardType = (Const) card[0];
-					Integer cardNumber = (Integer) card[1];
-					if(cardType.equals(Const.SEQ))
-						pc.setTimeSlot(pc.getTimeSlot() + cardNumber - 1);
-				}
+				pc.setPrevTimePath(gc.getPrevTimePath());
+				pc.setFutTimePath(gc.getFutTimePath());
+				pc.setTimePath(gc.getTimePath());
+				pc.setTimeSlot(gc.getPrevTimePath()+1);
 
 				pc.addFulfillmentConditions(gc.getFulfillmentConditions());
 
 				if (newplan){
 					addPlan(p, pc, ad);					
-					gc.setFutTimePath(Math.max(pc.getTimePath(), pc.getFutTimePath())); //TODO: gc.getFutTimePath() + ?
-					if(trivial || (!parPlan && rtAltGoals.get(pc.getElId()) == null))
-						gc.setTimeSlot(pc.getTimeSlot());
-					/*if(trivial || (parPlan || rtAltGoals.get(pc.getElId()) != null))
-						gc.setTimePath(pc.getTimePath());*/
-
+					gc.setFutTimePath(Math.max(pc.getTimeSlot(), pc.getFutTimePath()));
 				}
-
 			}			
 
 			//The unusual "means-end" with a goal as means:
@@ -689,7 +571,7 @@ public class RTGoreProducer {
 			rtTryGoals.putAll((Map<String, String[]>) res [3]);
 			rtOptGoals.putAll((Map<String, Boolean>) res[4]);
 			rtDMGoals.addAll((List<String>) res [7]);
-			
+
 			List<String> dmList = (List<String>) res[7];
 			if (!dmList.isEmpty()) return true;
 		}

@@ -641,8 +641,8 @@ public class PrismWriter {
 		Integer prevTimePath = plan.getPrevTimePath();
 		//Integer timePath = plan.getTimePath();
 		Integer timeSlot = plan.getTimeSlot();
-		if(plan.getCardType().equals(Const.SEQ))	
-			timeSlot -= plan.getCardNumber() - 1; 
+		/*if(plan.getCardType().equals(Const.SEQ))
+			timeSlot -= plan.getCardNumber() - 1;*/ 
 		for(int i = plan.getCardNumber(); i >= 0; i--){
 			if (plan.isTryFailure() || plan.isTrySuccess()) {
 				planModule = planModule.replace(PREV_TIME_SLOT_TAG + (i > 1 ? "_N" + i : "") + "$", "_" + (prevTimePath + 1 +i) + "");
