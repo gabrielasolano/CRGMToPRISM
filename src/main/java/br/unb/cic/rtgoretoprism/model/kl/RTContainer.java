@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.sun.crypto.provider.RSACipher;
+
 /**
  * A container for Goal object
  * 
@@ -143,6 +145,21 @@ public abstract class RTContainer extends ElementContainer implements Comparable
 		return plans;
 	}
 	
+	/**
+	 * @return Returns decomposed elements. 
+	 */
+	public LinkedList<RTContainer> getDecompElements() {
+		LinkedList<RTContainer> res = new LinkedList<RTContainer>();
+		if (!goals.isEmpty()) {
+			for (GoalContainer dec : goals)
+				res.add(dec);
+		}
+		else if (!plans.isEmpty()) {
+			for (PlanContainer dec : plans)
+				res.add(dec);
+		}
+		return res;
+	}
 	/**
 	 * @return Returns a decomposed goal by elId.
 	 */

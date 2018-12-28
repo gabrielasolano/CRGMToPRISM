@@ -199,13 +199,14 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 				reliabilityFormula = "( -1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
 						+ paramFormulaAo + " + " + paramFormulaBo + " )";
 				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
-				if (ctx.op.getType() == RTRegexParser.INT) {
+				costFormula = param.getSequentialOrCost(gids);
+				/*if (ctx.op.getType() == RTRegexParser.INT) {
 					if (gids.length <= 4) costFormula = param.getDecisionMakingFormula(gids);
 					else costFormula = "( " + paramCostAo + " * " + paramCostBo + " )";
 				}
 				else {
 					costFormula = param.getSequentialOrCost(gids);
-				}
+				}*/
 			}
 		}
 		return gidAo + '-' + gidBo;
@@ -305,8 +306,7 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 					+ paramFormulaAo + " + " + paramFormulaBo + " )";
 			
 			SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
-			if (gids.length <= 4) costFormula = param.getDecisionMakingFormula(gids);
-			else costFormula = "( " + paramCostAo + " * " + paramCostBo + " )";
+			costFormula = param.getSequentialOrCost(gids);
 			 
 		}
 		return gidAo + '-' + gidBo;

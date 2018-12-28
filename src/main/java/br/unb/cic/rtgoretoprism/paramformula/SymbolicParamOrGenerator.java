@@ -34,7 +34,7 @@ public class SymbolicParamOrGenerator {
 
 		if (nodes.length > 2) {
 			for (int i = nodes.length - 1; i >= 2; i--) {
-				formula.append(generateMultipleCombinations(nodes, i, sign));
+				formula.append(generateMultipleCombinationsCost(nodes, i, sign));
 				sign = changeSign(sign);
 			}
 		}
@@ -53,12 +53,54 @@ public class SymbolicParamOrGenerator {
 		return formula.toString();
 	}
 	
+public String getSequentialOrReliability(String[] nodes) {
+		
+		//StringBuilder reliability = getReliability(nodes);
+		StringBuilder formula = new StringBuilder();
+		
+		boolean isEven = false;
+		if ((nodes.length % 2) == 0) isEven = true;
+		
+		String sign = "";
+		if (isEven) {
+			sign = "-";
+			formula.append("( " + sign + " ");
+		}
+		else {
+			formula.append("( ");
+			sign = "+";
+		}
+		
+		//all nodes
+		for (String node : nodes) {
+			formula.append(node + " * ");
+		}
+		
+		formula.deleteCharAt(formula.length()-2);
+		sign = changeSign(sign);
+
+		if (nodes.length > 2) {
+			for (int i = nodes.length - 1; i >= 2; i--) {
+				formula.append(generateMultipleCombinationsReliability(nodes, i, sign));
+				sign = changeSign(sign);
+			}
+		}
+		
+		//Singles
+		for (String node : nodes) {
+			formula.append(" + " + node);
+		}
+        
+		formula.append(" )");
+		return formula.toString();
+	}
+	
 	private String changeSign(String sign) {
 		if (sign.equals("+")) return "-";
 		return "+";
 	}
 
-	private StringBuilder generateMultipleCombinations(String[] nodes, int numComb, String sign) {
+	private StringBuilder generateMultipleCombinationsCost (String[] nodes, int numComb, String sign) {
 		
 		StringBuilder formula = new StringBuilder();
 		
@@ -80,6 +122,27 @@ public class SymbolicParamOrGenerator {
         	for (String cost : costs) {
         		formula.append(prefix + cost + " ");
         	}
+        }
+        return formula;
+	}
+	
+private StringBuilder generateMultipleCombinationsReliability (String[] nodes, int numComb, String sign) {
+		
+		StringBuilder formula = new StringBuilder();
+		
+		List<String[]> list = new ArrayList<String[]>();
+		GenerateCombination comb1 = new GenerateCombination(nodes, numComb) ;
+        while (comb1.hasNext()) {
+        	list.add(comb1.next());
+        }
+        
+        for (String[] duple : list) {
+        	String prefix = " ";
+        	for (int i = 0; i < duple.length; i++) {
+        		prefix += duple[i] + " * "; 
+        	}
+        	prefix = prefix.substring(0, prefix.length()-2);
+        	formula.append(" " + sign + prefix);
         }
         return formula;
 	}

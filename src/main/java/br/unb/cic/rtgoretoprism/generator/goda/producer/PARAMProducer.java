@@ -24,6 +24,8 @@ import br.unb.cic.rtgoretoprism.model.kl.Const;
 import br.unb.cic.rtgoretoprism.model.kl.GoalContainer;
 import br.unb.cic.rtgoretoprism.model.kl.PlanContainer;
 import br.unb.cic.rtgoretoprism.model.kl.RTContainer;
+import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamAndGenerator;
+import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamOrGenerator;
 import br.unb.cic.rtgoretoprism.paramwrapper.ParamWrapper;
 import br.unb.cic.rtgoretoprism.util.FileUtility;
 import br.unb.cic.rtgoretoprism.util.PathLocation;
@@ -86,16 +88,13 @@ public class PARAMProducer {
 			nodeForm = replaceReliabilites(nodeForm);
 		}
 		
-		if (nodeForm.contains("CTX_"))
-			nodeForm = cleanMultipleContexts(nodeForm);
+		nodeForm = cleanMultipleContexts(nodeForm);
 		
 		nodeForm = nodeForm.replaceAll("\\s+", "");
 		nodeForm = nodeForm.replaceAll("\\+1", " +1");
 		nodeForm = nodeForm.replaceAll("-1", " -1");
 		nodeForm = nodeForm.replaceAll("\\+(?!1)", " + ");
 		nodeForm = nodeForm.replaceAll("-(?!1)", " - ");
-		
-		
 		
 		return nodeForm;
 	}
@@ -212,7 +211,7 @@ public class PARAMProducer {
 
 		String paramInputFolder = sourceFolder + "/PARAM/";
 
-		String body = ManageWriter.readFileAsString(paramInputFolder + "formulabody.param");
+		/*String body = ManageWriter.readFileAsString(paramInputFolder + "formulabody.param");
 
 		for (String opt : this.opts_formula) {
 
@@ -233,8 +232,9 @@ public class PARAMProducer {
 			body = body + "[0, 1]" + (leaf.equals(leavesId.get(leavesId.size()-1))? "]\n" : " ");
 		}
 
-		body = body + "  " + nodeForm + "\n\n";
+		body = body + "  " + nodeForm + "\n\n"; */
 
+		String body = nodeForm + "\n\n";
 		for (String ctxKey : ctxInformation.keySet()) {
 
 			body = body + "//" + ctxKey + " = " + ctxInformation.get(ctxKey) + "\n";
@@ -263,7 +263,8 @@ public class PARAMProducer {
 		rtAnnot = rootNode.getRtRegex();
 		ctxAnnot = rootNode.getFulfillmentConditions();
 
-		nodeForm = getNodeForm(decType, rtAnnot, nodeId, reliability);
+		//nodeForm = getNodeForm(decType, rtAnnot, nodeId, reliability);
+		nodeForm = getNodeForm(decType, rtAnnot, nodeId, reliability, rootNode);
 		
 		/*Run for sub goals*/
 		for (GoalContainer subNode : decompGoal) {
@@ -306,7 +307,6 @@ public class PARAMProducer {
 					removeXorOpt(nodeId, "OPT");
 			}	
 		}
-
 		if (reliability) this.reliabilityByNode.put(nodeId, nodeForm);
 
 		return nodeForm;
@@ -405,7 +405,7 @@ public class PARAMProducer {
 		return " " + subNodeString + " ";
 	}
 
-	private String getNodeForm(Const decType, String rtAnnot, String uid, boolean reliability) throws IOException {
+	/*private String getNodeForm(Const decType, String rtAnnot, String uid, boolean reliability) throws IOException {
 		
 		if (rtAnnot == null) {
 			return uid;
@@ -417,6 +417,63 @@ public class PARAMProducer {
 
 		if (reliability) return (String) res[5];		
 		return (String) res[6];
+	}*/
+	
+	//Get node form for AND/OR-decompositions and DM annotation only
+	private String getNodeForm(Const decType, String rtAnnot, String uid, boolean reliability, RTContainer rootNode) throws IOException {
+		
+		if (rtAnnot == null) {
+			List<String> childrenNodes = getChildrenId(rootNode);
+	
+			if (childrenNodes.size() <= 1) return uid;
+		
+			String formula = new String();
+			if (decType.equals(Const.AND)) {
+				if (reliability) {
+					formula = "( ";
+					for (String id : childrenNodes) {
+						formula += id + " * ";
+					}
+					formula = formula.substring(0, formula.length()-2);
+					formula += " )";
+				}
+				else {
+					SymbolicParamAndGenerator param = new SymbolicParamAndGenerator();
+					formula = param.getSequentialAndCost((String[]) childrenNodes.toArray(new String[0]));
+				}
+			}
+			else {
+				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
+				if (reliability) {
+					formula = param.getSequentialOrReliability((String[]) childrenNodes.toArray(new String[0]));
+				}
+				else {
+					formula = param.getSequentialOrCost((String[]) childrenNodes.toArray(new String[0]));
+				}
+			}
+			return formula;
+		}
+
+		Object [] res = RTParser.parseRegex(uid, rtAnnot + '\n', decType, true);
+
+		checkOptXorDeclaration((String) res[5]);
+
+		if (reliability) return (String) res[5];		
+		return (String) res[6];
+	}
+
+	private List<String> getChildrenId(RTContainer rootNode) {
+		List<String> ids = new ArrayList<String>();
+		LinkedList<RTContainer> children = rootNode.getDecompElements();
+		
+		if (children.isEmpty()) return ids;
+		
+		for (RTContainer child : children) {
+			if(child instanceof GoalContainer) ids.add(child.getClearUId());
+			else ids.add(child.getClearElId());
+		}
+		
+		return ids;
 	}
 
 	private void checkOptXorDeclaration(String formula) {
