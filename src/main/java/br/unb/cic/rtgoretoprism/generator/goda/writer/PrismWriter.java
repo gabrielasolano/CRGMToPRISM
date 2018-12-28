@@ -377,9 +377,10 @@ public class PrismWriter {
 
 	private void writeRewardModule(RTContainer root) {
 		PlanContainer plan = (PlanContainer) root;
+		String rewardPattern = new String(this.rewardPattern);
+		rewardPattern = rewardPattern.replace(GID_TAG, plan.getClearElId());
+		
 		if (plan.getCostRegex() != null) {
-			String rewardPattern = new String(this.rewardPattern);
-			rewardPattern = rewardPattern.replace(GID_TAG, plan.getClearElId());
 			String costVariable = plan.getCostVariable();
 			if (costVariable == null) {
 				rewardPattern = rewardPattern.replace(COST_VALUE_TAG, plan.getCostValue());
@@ -388,8 +389,13 @@ public class PrismWriter {
 				rewardPattern = rewardPattern.replace(COST_VALUE_TAG, plan.getCostValue() + "*" + costVariable);
 				if (!this.rewardVariables.contains(costVariable)) this.rewardVariables.add(costVariable);
 			}
-			rewardModule = rewardModule.append(rewardPattern);
 		}
+		else {
+			String newCost = "W_" + plan.getClearElId();
+			rewardPattern = rewardPattern.replace(COST_VALUE_TAG, newCost);
+			if (!this.rewardVariables.contains(newCost)) this.rewardVariables.add(newCost);
+		}
+		rewardModule = rewardModule.append(rewardPattern);
 	}
 
 	private String[] writePrismModule(

@@ -86,15 +86,15 @@ public class PARAMProducer {
 		
 		if (!reliability) {
 			nodeForm = replaceReliabilites(nodeForm);
+			nodeForm = cleanMultipleContexts(nodeForm);
 		}
-		
-		nodeForm = cleanMultipleContexts(nodeForm);
 		
 		nodeForm = nodeForm.replaceAll("\\s+", "");
 		nodeForm = nodeForm.replaceAll("\\+1", " +1");
 		nodeForm = nodeForm.replaceAll("-1", " -1");
 		nodeForm = nodeForm.replaceAll("\\+(?!1)", " + ");
 		nodeForm = nodeForm.replaceAll("-(?!1)", " - ");
+		nodeForm = nodeForm.replaceAll("\\*1\\*", "*");
 		
 		return nodeForm;
 	}
@@ -108,8 +108,8 @@ public class PARAMProducer {
 			for (String exp2 : minusSignalSplit) {
 				String aux = exp2.replaceAll("\\(","");
 				aux = aux.replaceAll("\\)","");
-				aux = aux.trim();
-				if (!aux.equals("1")) {
+				aux = aux.replaceAll("\\s+", "");
+				if (!aux.equals("1") && !aux.equals("")) {
 					String[] multSignalSplit = exp2.split("\\*");
 					nodeForm = replaceCtxRepetition(nodeForm, multSignalSplit);
 				}
@@ -137,7 +137,7 @@ public class PARAMProducer {
 			if (withRepetition.isEmpty()) withRepetition = i;
 			else withRepetition = withRepetition + "\\*" + i;
 
-			i = i.trim();
+			i = i.replaceAll("\\s+", "");
 
 			if (!lump.contains(i)) {
 				lump.add(i);
@@ -256,7 +256,7 @@ public class PARAMProducer {
 				nodeForm = getCostFormula(rootNode);
 			}
 
-			if (!ctxAnnot.isEmpty() && !nodeForm.equals("0")) {
+			if (!ctxAnnot.isEmpty()) {
 				nodeForm = insertCtxAnnotation(nodeForm, ctxAnnot, nodeId);
 			}	
 		}
@@ -273,7 +273,7 @@ public class PARAMProducer {
 			return (String) res[2];
 		}
 		
-		return "0";
+		return "W_"+rootNode.getClearElId();
 	}
 
 	private String insertCtxAnnotation(String nodeForm, List<String> ctxAnnot, String nodeId) {
