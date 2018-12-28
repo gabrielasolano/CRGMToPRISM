@@ -90,12 +90,7 @@ public class RTGoreProducer {
 	private boolean parametric;
 
 	/** memory for the parsed RT regexes */
-	Map<String, Boolean[]> rtSortedGoals;
-	Map<String, Object[]> rtCardGoals;
-	Map<String, Set<String>> rtAltGoals;
 	List<String> rtDMGoals;
-	Map<String, String[]> rtTryGoals;
-	Map<String, Boolean> rtOptGoals;
 
 	/**
 	 * Creates a new Producer instance
@@ -113,12 +108,7 @@ public class RTGoreProducer {
 		this.allActors = allActors;
 		this.allGoals = allGoals;
 
-		this.rtSortedGoals = new TreeMap<String, Boolean[]>();
-		this.rtCardGoals = new TreeMap<String, Object[]>();
-		this.rtAltGoals = new TreeMap<String, Set<String>>();
 		this.rtDMGoals = new ArrayList<String>();
-		this.rtTryGoals = new TreeMap<String, String[]>();
-		this.rtOptGoals = new TreeMap<String, Boolean>();
 		this.parametric = parametric;
 	}
 
@@ -237,9 +227,7 @@ public class RTGoreProducer {
 		if (dmRT) gc.setDecisionMaking(this.rtDMGoals);
 
 		iterateGoals(ad, gc, declist, included);
-		iterateRts(gc, gc.getDecompGoals());
 		iterateMeansEnds(g, gc, ad, included);
-		iterateRts(gc, gc.getDecompPlans());
 		//Set goals alternatives, tries, optional and cardinalities
 
 
@@ -359,8 +347,6 @@ public class RTGoreProducer {
 			// shall be the same than with OR! They could also be mixed in this implementation!
 			pc.createDecomposition(Const.ME);
 			iteratePlans(ad, pc, melist);			
-			//Set goals alternatives and tries
-			iterateRts(pc, pc.getDecompPlans());
 		}
 		else {			
 			List<FPlan> decList = (List<FPlan>) tn.getBooleanDec(p, FPlan.class);
@@ -372,8 +358,6 @@ public class RTGoreProducer {
 			else
 				pc.createDecomposition(Const.OR);
 			iteratePlans(ad, pc, decList);			
-			//Set goals alternatives and tries
-			iterateRts(pc, pc.getDecompPlans());
 		}
 
 		if (pc.isDecisionMaking()) {
@@ -484,94 +468,13 @@ public class RTGoreProducer {
 		}
 	}
 
-	private void iterateRts(RTContainer gc, List<? extends RTContainer> rts){
-		for(RTContainer dec : rts){
-			String elId = dec.getElId();
-			LinkedList <RTContainer> decPlans = RTContainer.fowardMeansEnd(dec, new LinkedList<RTContainer>());			
-			//Alternatives			
-			if(rtAltGoals.get(elId) != null){		
-				if(!dec.getFirstAlternatives().contains(rts.get(0))){
-					for(String altGoalId : rtAltGoals.get(elId)){
-						RTContainer altDec = gc.getDecompElement(altGoalId);						
-						if(altDec != null){
-							LinkedList <RTContainer> decAltPlans = RTContainer.fowardMeansEnd(altDec, new LinkedList<RTContainer>());
-							if(!decPlans.contains(dec)){
-								if(dec.getAlternatives().get(dec) == null)
-									dec.getAlternatives().put(dec, new LinkedList<RTContainer>());
-								dec.getAlternatives().get(dec).add(altDec);
-							}
-							if(!decAltPlans.contains(altDec))
-								altDec.getFirstAlternatives().add(dec);							
-							for(RTContainer decPlan : decPlans){
-								if(decPlan.getAlternatives().get(dec) == null)
-									decPlan.getAlternatives().put(dec, new LinkedList<RTContainer>());
-								decPlan.getAlternatives().get(dec).add(altDec);
-								//break;
-							}
-							for(RTContainer decAltPlan : decAltPlans)
-								decAltPlan.getFirstAlternatives().add(dec);
-						}			
-					}
-				}
-			}				
-			//Try
-			if(rtTryGoals.get(elId) != null){	
-				String [] tryGoals = rtTryGoals.get(elId);
-				if(tryGoals[0] != null){
-					RTContainer successPlan = gc.getDecompElement(tryGoals[0]);
-					successPlan.setTimeSlot(gc.getTimeSlot());
-					LinkedList<RTContainer> decSucessPlans = RTContainer.fowardMeansEnd(successPlan, new LinkedList<RTContainer>());
-					for(RTContainer decPlan : decPlans){
-						decPlan.setTrySuccess(successPlan);
-					}
-					for(RTContainer decSucessPlan : decSucessPlans){						
-						decSucessPlan.setTryOriginal(dec);
-						decSucessPlan.setSuccessTry(true);
-					}
-				}
-				if(tryGoals[1] != null){
-					RTContainer failurePlan = gc.getDecompElement(tryGoals[1]);
-					failurePlan.setTimeSlot(gc.getTimeSlot());
-					LinkedList<RTContainer> decFailurePlans = RTContainer.fowardMeansEnd(failurePlan, new LinkedList<RTContainer>());
-					for(RTContainer decPlan : decPlans){
-						decPlan.setTryFailure(failurePlan);
-					}
-					for(RTContainer decFailurePlan : decFailurePlans){						
-						decFailurePlan.setTryOriginal(dec);
-						decFailurePlan.setSuccessTry(false);
-					}
-				}
-			}
-			//Optional
-			if(rtOptGoals.containsKey(elId))
-				for(RTContainer decPlan : decPlans)
-					decPlan.setOptional(rtOptGoals.get(elId));
-			//Cardinality
-			if(rtCardGoals.containsKey(elId)){
-				Object[] card = rtCardGoals.get(elId);
-				Const cardType = (Const) card[0];
-				Integer cardNumber = (Integer) card[1];
-				for(RTContainer decPlan : decPlans){
-					decPlan.setCardType(cardType);
-					decPlan.setCardNumber(cardNumber);
-				}
-			}
-		}						
-	}
-
-
 	@SuppressWarnings("unchecked")
 	private boolean storeRegexResults(String uid, String rtRegex, Const decType) throws IOException {
 		if(rtRegex != null){
 			Object [] res = RTParser.parseRegex(uid, rtRegex + '\n', decType, false);
-			rtSortedGoals.putAll((Map<String, Boolean[]>) res [0]);
-			rtCardGoals.putAll((Map<String, Object[]>) res [1]);
-			rtAltGoals.putAll((Map<String, Set<String>>) res [2]);
-			rtTryGoals.putAll((Map<String, String[]>) res [3]);
-			rtOptGoals.putAll((Map<String, Boolean>) res[4]);
-			rtDMGoals.addAll((List<String>) res [7]);
+			rtDMGoals.addAll((List<String>) res [2]);
 
-			List<String> dmList = (List<String>) res[7];
+			List<String> dmList = (List<String>) res[2];
 			if (!dmList.isEmpty()) return true;
 		}
 		return false;

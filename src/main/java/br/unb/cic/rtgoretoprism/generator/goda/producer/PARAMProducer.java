@@ -175,24 +175,6 @@ public class PARAMProducer {
 		return nodeForm;
 	}
 
-	/*private void generatePctlFormula() throws IOException {
-
-		StringBuilder pctl = new StringBuilder("P=? [ true U (");
-		StringBuilder goals = new StringBuilder();
-		int i = 0;
-
-		for(FHardGoal goal : allGoals){
-			pctl.append(AgentDefinition.parseElId(goal.getName()) + (i < allGoals.size() - 1 ? "&" : ""));
-			goals.append(AgentDefinition.parseElId(goal.getName()));
-			i++;
-		}
-
-		pctl.append(") ]");
-
-		FileUtility.deleteFile(targetFolder + "/AgentRole_" + agentName + "/reachability.pctl", false);
-		FileUtility.writeFile(pctl.toString(), targetFolder + "/AgentRole_" + agentName + "/reachability.pctl");
-	}*/
-
 	private void printFormula(String reliabilityForm, String costForm) throws CodeGenerationException {
 
 		reliabilityForm = composeFormula(reliabilityForm);
@@ -208,31 +190,6 @@ public class PARAMProducer {
 	}
 
 	private String composeFormula(String nodeForm) throws CodeGenerationException {
-
-		String paramInputFolder = sourceFolder + "/PARAM/";
-
-		/*String body = ManageWriter.readFileAsString(paramInputFolder + "formulabody.param");
-
-		for (String opt : this.opts_formula) {
-
-			body = body + opt + ", ";
-		}
-
-		for (String leaf : this.leavesId) {
-
-			body = body + "rTask" + leaf + (leaf.equals(leavesId.get(leavesId.size()-1))? "]\n[" : ", ");
-		}
-
-		for (String opt : this.opts_formula) {
-
-			body = body + "[0, 1] ";
-		}
-
-		for (String leaf : this.leavesId) {
-			body = body + "[0, 1]" + (leaf.equals(leavesId.get(leavesId.size()-1))? "]\n" : " ");
-		}
-
-		body = body + "  " + nodeForm + "\n\n"; */
 
 		String body = nodeForm + "\n\n";
 		for (String ctxKey : ctxInformation.keySet()) {
@@ -301,10 +258,6 @@ public class PARAMProducer {
 
 			if (!ctxAnnot.isEmpty() && !nodeForm.equals("0")) {
 				nodeForm = insertCtxAnnotation(nodeForm, ctxAnnot, nodeId);
-				if (rootNode.isAlternative())
-					removeXorOpt(nodeId, "XOR");
-				if (rootNode.isOptional())
-					removeXorOpt(nodeId, "OPT");
 			}	
 		}
 		if (reliability) this.reliabilityByNode.put(nodeId, nodeForm);
@@ -321,18 +274,6 @@ public class PARAMProducer {
 		}
 		
 		return "0";
-	}
-
-	/*Remove XOR or OPT parameter from the symbolic formula*/
-	private void removeXorOpt(String nodeId, String xorOpt) {
-		List<String> opt_formula_aux = new ArrayList<String>();
-		for (String xor : this.opts_formula) {
-			String id = xor.replaceAll(xorOpt + "_", "");
-			if (!nodeId.equals(id)) {
-				opt_formula_aux.add(xor);
-			}
-		}
-		this.opts_formula = opt_formula_aux;
 	}
 
 	private String insertCtxAnnotation(String nodeForm, List<String> ctxAnnot, String nodeId) {
@@ -404,20 +345,6 @@ public class PARAMProducer {
 	private String restricToString(String subNodeString) {
 		return " " + subNodeString + " ";
 	}
-
-	/*private String getNodeForm(Const decType, String rtAnnot, String uid, boolean reliability) throws IOException {
-		
-		if (rtAnnot == null) {
-			return uid;
-		}
-
-		Object [] res = RTParser.parseRegex(uid, rtAnnot + '\n', decType, true);
-
-		checkOptXorDeclaration((String) res[5]);
-
-		if (reliability) return (String) res[5];		
-		return (String) res[6];
-	}*/
 	
 	//Get node form for AND/OR-decompositions and DM annotation only
 	private String getNodeForm(Const decType, String rtAnnot, String uid, boolean reliability, RTContainer rootNode) throws IOException {
@@ -456,10 +383,8 @@ public class PARAMProducer {
 
 		Object [] res = RTParser.parseRegex(uid, rtAnnot + '\n', decType, true);
 
-		checkOptXorDeclaration((String) res[5]);
-
-		if (reliability) return (String) res[5];		
-		return (String) res[6];
+		if (reliability) return (String) res[0];		
+		return (String) res[1];
 	}
 
 	private List<String> getChildrenId(RTContainer rootNode) {
@@ -474,30 +399,5 @@ public class PARAMProducer {
 		}
 		
 		return ids;
-	}
-
-	private void checkOptXorDeclaration(String formula) {
-
-		if (formula.contains("OPT")) {
-			String regex = "OPT_(.*?) ";
-			Matcher match = Pattern.compile(regex).matcher(formula);
-			while (match.find()) {
-				String optDeclaration = "OPT_" + match.group(1);
-				if (!this.opts_formula.contains(optDeclaration)) {
-					this.opts_formula.add(optDeclaration);
-				}
-			}
-		}
-
-		if (formula.contains("XOR")) {
-			String regex = "XOR_(.*?) ";
-			Matcher match = Pattern.compile(regex).matcher(formula);
-			while (match.find()) {
-				String optDeclaration = "XOR_" + match.group(1);
-				if (!this.opts_formula.contains(optDeclaration)) {
-					this.opts_formula.add(optDeclaration);
-				}
-			}
-		}
 	}
 }

@@ -294,6 +294,7 @@ public class CRGMTestProducer{
 			rtTryGoals.putAll((Map<String, String[]>) res [3]);
 			rtOptGoals.putAll((Map<String, Boolean>) res[4]);
 		}
+		// TODO tests are not based on DM annotation, only. They will fail in this branch.
 	}
 
 	private void addCtxVar(List<ContextCondition> ctxs) throws Exception {

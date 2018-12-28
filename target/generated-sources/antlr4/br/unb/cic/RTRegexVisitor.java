@@ -12,12 +12,12 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface RTRegexVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by the {@code parens}
+	 * Visit a parse tree produced by the {@code gDM}
 	 * labeled alternative in {@link RTRegexParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParens(@NotNull RTRegexParser.ParensContext ctx);
+	T visitGDM(@NotNull RTRegexParser.GDMContext ctx);
 
 	/**
 	 * Visit a parse tree produced by the {@code blank}
@@ -36,74 +36,11 @@ public interface RTRegexVisitor<T> extends ParseTreeVisitor<T> {
 	T visitGId(@NotNull RTRegexParser.GIdContext ctx);
 
 	/**
-	 * Visit a parse tree produced by the {@code gTry}
-	 * labeled alternative in {@link RTRegexParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGTry(@NotNull RTRegexParser.GTryContext ctx);
-
-	/**
-	 * Visit a parse tree produced by the {@code gTime}
-	 * labeled alternative in {@link RTRegexParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGTime(@NotNull RTRegexParser.GTimeContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link RTRegexParser#multiple}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMultiple(@NotNull RTRegexParser.MultipleContext ctx);
-
-	/**
-	 * Visit a parse tree produced by the {@code gAlt}
-	 * labeled alternative in {@link RTRegexParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGAlt(@NotNull RTRegexParser.GAltContext ctx);
-
-	/**
-	 * Visit a parse tree produced by the {@code gDM}
-	 * labeled alternative in {@link RTRegexParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGDM(@NotNull RTRegexParser.GDMContext ctx);
-
-	/**
-	 * Visit a parse tree produced by the {@code gSkip}
-	 * labeled alternative in {@link RTRegexParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGSkip(@NotNull RTRegexParser.GSkipContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link RTRegexParser#id}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitId(@NotNull RTRegexParser.IdContext ctx);
-
-	/**
-	 * Visit a parse tree produced by the {@code gOpt}
-	 * labeled alternative in {@link RTRegexParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGOpt(@NotNull RTRegexParser.GOptContext ctx);
-
-	/**
-	 * Visit a parse tree produced by the {@code gCard}
-	 * labeled alternative in {@link RTRegexParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGCard(@NotNull RTRegexParser.GCardContext ctx);
 
 	/**
 	 * Visit a parse tree produced by the {@code gDecisionMaking}
