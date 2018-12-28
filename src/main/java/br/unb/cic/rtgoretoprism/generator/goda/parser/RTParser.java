@@ -15,6 +15,7 @@ import br.unb.cic.RTRegexBaseVisitor;
 import br.unb.cic.RTRegexLexer;
 import br.unb.cic.RTRegexParser;
 import br.unb.cic.RTRegexParser.GDMContext;
+import br.unb.cic.RTRegexParser.GDecisionMakingContext;
 import br.unb.cic.RTRegexParser.GIdContext;
 import br.unb.cic.RTRegexParser.PrintExprContext;
 import br.unb.cic.rtgoretoprism.model.kl.Const;
@@ -102,38 +103,11 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 		}
 		return gid;
 	}
-
-	private String checkNestedRT (String paramFormulaAux, boolean isReliability) {
-
-		if (isReliability) {
-			if (!reliabilityFormula.isEmpty()) {
-				paramFormulaAux = reliabilityFormula;
-				reliabilityFormula = "";
-			}	
-		}
-		else {
-			if (!costFormula.isEmpty()) {
-				paramFormulaAux = costFormula;
-				costFormula = "";
-			}
-		}
-		return paramFormulaAux;
-	}
-
+	
 	@Override
 	public String visitGDM(GDMContext ctx) {
 		String gidAo = super.visit(ctx.expr(0));
 		String gidBo = super.visit(ctx.expr(1));
-		
-		String paramFormulaAo = gidAo.replaceAll("\\.", "_");
-		String paramCostAo = paramFormulaAo;
-		paramFormulaAo = checkNestedRT(paramFormulaAo, true);
-		paramCostAo = checkNestedRT(paramCostAo, false);
-		
-		String paramFormulaBo = gidBo.replaceAll("\\.", "_");
-		String paramCostBo = paramFormulaBo;
-		paramFormulaBo = checkNestedRT(paramFormulaBo, true);
-		paramCostBo = checkNestedRT(paramCostBo, false);
 		
 		String [] gidAs = gidAo.split("-");
 		String [] gidBs = gidBo.split("-");		
@@ -150,15 +124,6 @@ class CustomRTRegexVisitor extends  RTRegexBaseVisitor<String> {
 				decisionMemory.add(gidB);
 			gids[i] = gidB.replaceAll("\\.", "_");
 			i++;
-		}
-		
-		if (param) {
-			reliabilityFormula = "( -1 * ( " + paramFormulaAo + " * " + paramFormulaBo + " ) + "
-					+ paramFormulaAo + " + " + paramFormulaBo + " )";
-			
-			SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
-			costFormula = param.getSequentialOrCost(gids);
-			 
 		}
 		return gidAo + '-' + gidBo;
 	}

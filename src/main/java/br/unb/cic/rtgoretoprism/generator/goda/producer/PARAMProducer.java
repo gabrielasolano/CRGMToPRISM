@@ -126,10 +126,7 @@ public class PARAMProducer {
 		boolean isZero = false;
 		 
 		for (String i : multSignalSplit) {
-			
-			if (i.contains("/")) {
-				i = i.substring(0, i.indexOf("/")-1);
-			}
+			if (i.startsWith(" (")) i = i.substring(1, i.length());
 			
 			i = i.replaceAll("\\(", "");
 			i = i.replaceAll("\\)", "");
@@ -368,12 +365,11 @@ public class PARAMProducer {
 	//Get node form for AND/OR-decompositions and DM annotation only
 	private String getNodeForm(Const decType, String rtAnnot, String uid, boolean reliability, RTContainer rootNode) throws IOException {
 		
+		List<String> childrenNodes = getChildrenId(rootNode);
+		String formula = new String();
 		if (rtAnnot == null) {
-			List<String> childrenNodes = getChildrenId(rootNode);
-	
 			if (childrenNodes.size() <= 1) return uid;
 		
-			String formula = new String();
 			if (decType.equals(Const.AND)) {
 				if (reliability) {
 					formula = "( ";
@@ -399,11 +395,22 @@ public class PARAMProducer {
 			}
 			return formula;
 		}
-
-		Object [] res = RTParser.parseRegex(uid, rtAnnot + '\n', decType, true);
-
-		if (reliability) return (String) res[0];		
-		return (String) res[1];
+		else {
+			if (childrenNodes.size() == 1) {
+				if (reliability) return " ( " + childrenNodes.get(0) + " )";
+				formula = " ( R_" + childrenNodes.get(0) + " * " + childrenNodes.get(0) + " )";
+			}
+			else {
+				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
+				if (reliability) {
+					formula = param.getSequentialOrReliability((String[]) childrenNodes.toArray(new String[0]));
+				}
+				else {
+					formula = param.getSequentialOrCost((String[]) childrenNodes.toArray(new String[0]));
+				}
+			}
+		}
+		return formula;
 	}
 
 	private List<String> getChildrenId(RTContainer rootNode) {
