@@ -257,7 +257,7 @@ public class PARAMProducer {
 			}
 
 			if (!ctxAnnot.isEmpty()) {
-				nodeForm = insertCtxAnnotation(nodeForm, ctxAnnot, nodeId);
+				nodeForm = insertCtxAnnotation(nodeForm, ctxAnnot, rootNode);
 			}	
 		}
 		if (reliability) this.reliabilityByNode.put(nodeId, nodeForm);
@@ -276,11 +276,15 @@ public class PARAMProducer {
 		return "W_"+rootNode.getClearElId();
 	}
 
-	private String insertCtxAnnotation(String nodeForm, List<String> ctxAnnot, String nodeId) {
+	private String insertCtxAnnotation(String nodeForm, List<String> ctxAnnot, RTContainer rootNode) {
 
 		List<String> cleanCtx = clearCtxList(ctxAnnot);
 
-		String ctxParamId = "CTX_" + nodeId;
+		//Check if context if from non-deterministic node
+		String contextId = getContextId(rootNode);
+		
+		//String ctxParamId = "CTX_" + nodeId;
+		String ctxParamId = "CTX_" + contextId;
 		nodeForm = ctxParamId + "*" + nodeForm;
 
 		String ctxConcat = new String();
@@ -300,6 +304,21 @@ public class PARAMProducer {
 		}
 
 		return nodeForm;
+	}
+
+	private String getContextId(RTContainer node) {		
+		RTContainer root = node.getRoot();
+		RTContainer child = node;
+		while (root != null) {
+			if (root.isDecisionMaking()) {
+				if(child instanceof GoalContainer) return child.getClearUId();
+				else return child.getClearElId();
+			}
+			child = root;
+			root = root.getRoot();
+		}
+		if(node instanceof GoalContainer) return node.getClearUId();
+		else return node.getClearElId();
 	}
 
 	private List<String> clearCtxList(List<String> ctxAnnot) {
