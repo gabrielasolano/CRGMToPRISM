@@ -10,13 +10,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import br.unb.cic.rtgoretoprism.console.ATCConsole;
 import br.unb.cic.rtgoretoprism.generator.CodeGenerationException;
 import br.unb.cic.rtgoretoprism.generator.goda.parser.CostParser;
-import br.unb.cic.rtgoretoprism.generator.goda.parser.RTParser;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.ManageWriter;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.ParamWriter;
 import br.unb.cic.rtgoretoprism.generator.kl.AgentDefinition;
@@ -27,7 +24,6 @@ import br.unb.cic.rtgoretoprism.model.kl.RTContainer;
 import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamAndGenerator;
 import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamOrGenerator;
 import br.unb.cic.rtgoretoprism.paramwrapper.ParamWrapper;
-import br.unb.cic.rtgoretoprism.util.FileUtility;
 import br.unb.cic.rtgoretoprism.util.PathLocation;
 import it.itc.sra.taom4e.model.core.informalcore.Actor;
 import it.itc.sra.taom4e.model.core.informalcore.formalcore.FHardGoal;
@@ -42,7 +38,6 @@ public class PARAMProducer {
 
 	private String agentName;
 	private List<String> leavesId = new ArrayList<String>();
-	private List<String> opts_formula = new ArrayList<String>();
 	private Map<String,String> ctxInformation = new HashMap<String,String>();
 	private List<String> varReliabilityInformation = new ArrayList<String>();
 	private List<String> varCostInformation = new ArrayList<String>();
@@ -59,8 +54,6 @@ public class PARAMProducer {
 
 	public void run() throws CodeGenerationException, IOException {
 
-		long startTime = new Date().getTime();
-
 		for(Actor actor : allActors){
 
 			RTGoreProducer producer = new RTGoreProducer(allActors, allGoals, sourceFolder, targetFolder, false);
@@ -68,6 +61,7 @@ public class PARAMProducer {
 
 			agentName = ad.getAgentName();
 
+			long startTime = new Date().getTime();
 			ATCConsole.println("Generating PARAM formulas for: " + agentName);
 
 			// Compose goal formula
@@ -76,12 +70,11 @@ public class PARAMProducer {
 			
 			reliabilityForm = cleanNodeForm(reliabilityForm, true);
 			costForm = cleanNodeForm(costForm, false);
-
+			
 			//Print formula
 			printFormula(reliabilityForm, costForm);
-
+			ATCConsole.println( "PARAM formulas created in " + (new Date().getTime() - startTime) + "ms.");
 		}
-		ATCConsole.println( "PARAM formulas created in " + (new Date().getTime() - startTime) + "ms.");
 	}
 
 	private String cleanNodeForm(String nodeForm, boolean reliability) {
@@ -92,12 +85,6 @@ public class PARAMProducer {
 		}
 		
 		nodeForm = nodeForm.replaceAll("\\s+", "");
-		nodeForm = nodeForm.replaceAll("\\+1", " +1");
-		nodeForm = nodeForm.replaceAll("-1", " -1");
-		nodeForm = nodeForm.replaceAll("\\+(?!1)", " + ");
-		nodeForm = nodeForm.replaceAll("-(?!1)", " - ");
-		nodeForm = nodeForm.replaceAll("\\*1\\*", "*");
-		
 		return nodeForm;
 	}
 
@@ -125,7 +112,6 @@ public class PARAMProducer {
 		Set<String> lump = new HashSet<String>();
 		String withoutRepetition = new String();
 		String withRepetition = new String();
-		boolean isZero = false;
 		 
 		for (String i : multSignalSplit) {
 			if (i.startsWith(" (")) i = i.substring(1, i.length());
@@ -144,18 +130,9 @@ public class PARAMProducer {
 					if (withoutRepetition.isEmpty()) withoutRepetition = i;
 					else withoutRepetition = withoutRepetition + "*" + i;
 				}
-				if (i.equals("0")) isZero = true;
 		    }
 		}
 		
-		if (isZero) {
-			withRepetition = "\\+" + withRepetition;
-			nodeForm = nodeForm.replaceAll(withRepetition, "");
-			withRepetition = withRepetition.substring(1,withRepetition.length());
-			withRepetition = "-" + withRepetition;
-			nodeForm = nodeForm.replaceAll(withRepetition, "");
-			return nodeForm;
-		}
 		nodeForm = nodeForm.replaceAll(withRepetition, withoutRepetition);
 		return nodeForm;
 	}
@@ -309,10 +286,6 @@ public class PARAMProducer {
 		}
 
 		ctxInformation.put(ctxParamId, ctxConcat);
-
-		if (!this.opts_formula.contains(ctxParamId)) {
-			this.opts_formula.add(ctxParamId);
-		}
 
 		return nodeForm;
 	}
