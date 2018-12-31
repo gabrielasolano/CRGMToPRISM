@@ -44,6 +44,8 @@ public class PARAMProducer {
 	private List<String> leavesId = new ArrayList<String>();
 	private List<String> opts_formula = new ArrayList<String>();
 	private Map<String,String> ctxInformation = new HashMap<String,String>();
+	private List<String> varReliabilityInformation = new ArrayList<String>();
+	private List<String> varCostInformation = new ArrayList<String>();
 	private Map<String,String> reliabilityByNode = new HashMap<String,String>();
 
 	public PARAMProducer(Set<Actor> allActors, Set<FHardGoal> allGoals, String in, String out, String tools) {
@@ -174,8 +176,8 @@ public class PARAMProducer {
 
 	private void printFormula(String reliabilityForm, String costForm) throws CodeGenerationException {
 
-		reliabilityForm = composeFormula(reliabilityForm);
-		costForm = composeFormula(costForm);
+		reliabilityForm = composeFormula(reliabilityForm, true);
+		costForm = composeFormula(costForm, false);
 
 		String output = targetFolder + "/" + PathLocation.BASIC_AGENT_PACKAGE_PREFIX + agentName + "/";
 
@@ -186,12 +188,20 @@ public class PARAMProducer {
 		ManageWriter.printModel(costFormula, costForm);
 	}
 
-	private String composeFormula(String nodeForm) throws CodeGenerationException {
+	private String composeFormula(String nodeForm, boolean isReliability) throws CodeGenerationException {
 
 		String body = nodeForm + "\n\n";
 		for (String ctxKey : ctxInformation.keySet()) {
 
 			body = body + "//" + ctxKey + " = " + ctxInformation.get(ctxKey) + "\n";
+		}
+		for (String var : this.varReliabilityInformation) {
+			body = body + var;
+		}
+		if (!isReliability) {
+			for (String var : this.varCostInformation) {
+				body = body + var;
+			}
 		}
 
 		return body;
@@ -247,10 +257,14 @@ public class PARAMProducer {
 				//Call to param (reliability)
 				ParamWrapper paramWrapper = new ParamWrapper(toolsFolder, nodeId);
 				nodeForm = paramWrapper.getFormula(model);
+				nodeForm = nodeForm.replaceAll("1\\*", "");
+				
+				this.varReliabilityInformation.add("//" + nodeForm + " = reliability of node " + nodeId + "\n");
 			}
 			else {
 				//Cost
 				nodeForm = getCostFormula(rootNode);
+				this.varCostInformation.add("//" + nodeForm + " = cost of node " + nodeId + "\n");
 			}
 
 			if (!ctxAnnot.isEmpty()) {
