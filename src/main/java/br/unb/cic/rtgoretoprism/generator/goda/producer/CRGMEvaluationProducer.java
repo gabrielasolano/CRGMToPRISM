@@ -1,6 +1,8 @@
 package br.unb.cic.rtgoretoprism.generator.goda.producer;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import br.unb.cic.rtgoretoprism.generator.kl.AgentDefinition;
 import br.unb.cic.rtgoretoprism.model.kl.Const;
@@ -35,7 +37,8 @@ public class CRGMEvaluationProducer {
 	}
 	
 	public static void main(String [] args){
-		CRGMEvaluationProducer producer = new CRGMEvaluationProducer(8, Const.AND, Const.SEQ, Const.NONE, "EvaluationActor");
+		//CRGMEvaluationProducer producer = new CRGMEvaluationProducer(8, Const.AND, Const.SEQ, Const.NONE, "EvaluationActor");
+		CRGMEvaluationProducer producer = new CRGMEvaluationProducer(8, Const.OR, Const.SEQ, Const.DM, "EvaluationActor");
 		producer.generateCRGM();
 		System.out.println(producer.agentDefinition.getGoalBase().size());
 		System.out.println(producer.agentDefinition.planbase.size());		
@@ -54,15 +57,33 @@ public class CRGMEvaluationProducer {
 		agentDefinition = new AgentDefinition(actor);
 		RTContainer root = createGoal(null, 0, 0, "");
 		agentDefinition.addRootGoal((GoalContainer)root);
-		for(int i = 0; i < MAX_TASKS; i++)
+		
+		String rtAnnot = "DM(";
+		for(int i = 0; i < MAX_TASKS; i++) {
 			addRuleElements(root, i + "");
+			if (i==0 && mandRule==Const.DM) {
+				List<String> dmAnnot = new ArrayList<String>();
+				dmAnnot.add("isDecisionMaking");
+				root.setDecisionMaking(dmAnnot);
+			}
+			if (mandRule==Const.DM) rtAnnot += "T_" + i + "1,";
+		}
+		
+		if (mandRule==Const.DM) {
+			rtAnnot = rtAnnot.substring(0, rtAnnot.length()-1);
+			rtAnnot += ")";
+			root.setRtRegex(rtAnnot);
+		}
 		return agentDefinition;
 	}
 	
 	public void addRuleElements(RTContainer parent, String id){
 		
 		PlanContainer p1, p2, p3;
-		switch(mandRule){				
+		switch(mandRule){
+			case DM:
+				p1 = createPlan(parent, Const.OR, timeRule, Const.DM, id + "1");
+				break;
 			case OPT:
 				p1 = createPlan(parent, dec, timeRule, Const.OPT, id + "1");
 				p1.setOptional(true);
@@ -137,7 +158,7 @@ public class CRGMEvaluationProducer {
 		
 		planCt.setPrevTimePath(timePath);
 		planCt.setTimePath(timePath);
-		planCt.setTimeSlot(timeSlot);		
+		planCt.setTimeSlot(timeSlot);	
 		
 		//Custom
 		planCt.setOptional(mandType == Const.OPT);
@@ -148,6 +169,9 @@ public class CRGMEvaluationProducer {
 			((GoalContainer) parent).createDecomposition(dec);
 			//else
 				//((GoalContainer) parent).createDecomposition(Const.AND);
+			if (mandType == Const.DM) {
+				planCt.addFulfillmentConditions("assertion trigger ctx=" + id);
+			}
 		}
 		return planCt;
 	}

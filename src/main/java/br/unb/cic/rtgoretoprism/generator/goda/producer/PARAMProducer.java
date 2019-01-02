@@ -38,6 +38,7 @@ public class PARAMProducer {
 	private String toolsFolder;
 	private Set<Actor> allActors;
 	private Set<FHardGoal> allGoals;
+	private AgentDefinition ad;
 
 	private String agentName;
 	private List<String> leavesId = new ArrayList<String>();
@@ -55,15 +56,29 @@ public class PARAMProducer {
 		this.allGoals = allGoals;
 	}
 
+	public PARAMProducer(AgentDefinition ad, Set<Actor> selectedActors, Set<FHardGoal> selectedGoals,
+			String sourceFolder, String targetFolder, String toolsFolder) {
+		this.sourceFolder = sourceFolder;
+		this.targetFolder = targetFolder;
+		this.toolsFolder = toolsFolder;
+		this.allActors = selectedActors;
+		this.allGoals = selectedGoals;
+		this.ad = ad;
+		this.agentName = ad.getAgentName();
+	}
+
 	public void run() throws CodeGenerationException, IOException {
 
 		for(Actor actor : allActors){
 
-			RTGoreProducer producer = new RTGoreProducer(allActors, allGoals, sourceFolder, targetFolder, false);
-			AgentDefinition ad = producer.run();
+			if (this.ad == null) {
+				RTGoreProducer producer = new RTGoreProducer(allActors, allGoals, sourceFolder, targetFolder, false);
+				AgentDefinition ad = producer.run();
 
-			agentName = ad.getAgentName();
-
+				this.ad = ad;
+				agentName = ad.getAgentName();
+			}
+			
 			long startTime = new Date().getTime();
 			ATCConsole.println("Generating PARAM formulas for: " + agentName);
 
@@ -159,6 +174,7 @@ public class PARAMProducer {
 		reliabilityForm = composeFormula(reliabilityForm, true);
 		costForm = composeFormula(costForm, false);
 
+		//agentName = "EvaluationActor";
 		String output = targetFolder + "/" + PathLocation.BASIC_AGENT_PACKAGE_PREFIX + agentName + "/";
 
 		PrintWriter reliabiltyFormula = ManageWriter.createFile("reliability.out", output);
@@ -375,25 +391,6 @@ public class PARAMProducer {
 				}
 			}
 			else {
-				/*SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
-				if (reliability) {
-					//R(1,2)
-					formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
-					if (!reliability) {
-						formula = formula.replaceAll(childrenNodes.get(0), "R_" + childrenNodes.get(0));
-						formula = formula.replaceAll(childrenNodes.get(1), "R_" + childrenNodes.get(1));
-						String removeFromFormula = formula + " * " + childrenNodes.get(1); //-R1W2
-						formula = formula + " * ( " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
-					}
-					
-					for (int i = 2; i < childrenNodes.size(); i++) {
-						formula = "( - " + formula + " * " + childrenNodes.get(i) + " + " + formula + " + " + childrenNodes.get(i) + " ) ";
-					}
-				}
-				else {
-					formula = param.getSequentialOrCost((String[]) childrenNodes.toArray(new String[0]));
-				}*/
-
 				formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
 				String removeFromFormula = new String();
 				String sumCost = new String();
@@ -424,16 +421,6 @@ public class PARAMProducer {
 				formula = " ( R_" + childrenNodes.get(0) + " * " + childrenNodes.get(0) + " )";
 			}
 			else {
-//				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
-//				if (reliability) {
-//					formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
-//					for (int i = 2; i < childrenNodes.size(); i++) {
-//						formula = "( - " + formula + " * " + childrenNodes.get(i) + " + " + formula + " + " + childrenNodes.get(i) + " ) ";
-//					}
-//				}
-//				else {
-//					formula = param.getSequentialOrCost((String[]) childrenNodes.toArray(new String[0]));
-//				}
 				formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
 				String removeFromFormula = new String();
 				String sumCost = new String();

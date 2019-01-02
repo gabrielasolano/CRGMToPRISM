@@ -31,6 +31,7 @@
 package br.unb.cic.rtgoretoprism.action;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ import org.troposproject.util.Spawn;
 import br.unb.cic.rtgoretoprism.console.ConsoleUtil;
 import br.unb.cic.rtgoretoprism.generator.CodeGenerationException;
 import br.unb.cic.rtgoretoprism.generator.goda.producer.CRGMEvaluationProducer;
+import br.unb.cic.rtgoretoprism.generator.goda.producer.PARAMProducer;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.PrismWriter;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.dtmc.DTMCWriter;
 import br.unb.cic.rtgoretoprism.generator.kl.AgentDefinition;
@@ -169,18 +171,36 @@ public class EvaluatePARAMAction extends AbstractCodeGeneractionAction {
 				MessageConsoleStream out = myConsole.newMessageStream();
 				
 				//CRGMEvaluationCtProducer evaluationProducer = new CRGMEvaluationCtProducer(currentDepth, currentDepth - 1, BRANCHES, agentName);        								
-				CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.AND, Const.SEQ, Const.TRY, agentName);
+				//CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.AND, Const.SEQ, Const.TRY, agentName);
+				CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.OR, Const.SEQ, Const.DM, agentName);
 				AgentDefinition ad = evaluationProducer.generateCRGM();
 				PrismWriter writer = new DTMCWriter( ad, new ArrayList<Plan>(), sourceFolder, targetFolder, true);
-				writer.writeModel();					
-				Spawn spawn = new Spawn( new File(sourceFolder + "/../" + "scripts/linux"), out, out, this, new String[]{cmd, arg1, arg2, arg3});
-				spawn.start();				
+				writer.writeModel();	
+				PARAMProducer param = new PARAMProducer(ad, selectedActors, selectedGoals, sourceFolder, targetFolder, toolsFolder);
+				param.run();
+				Runtime runtime = Runtime.getRuntime();
+				runtime.exec("cp " + sourceFolder + "/../" + "scripts/linux/evaluate.sh " + targetFolder + "AgentRole_" + agentName + "/");
+				runtime.exec("chmod +x" + targetFolder + "AgentRole_" + agentName + "/evaluate.sh");
+				runtime.exec("chmod +x" + targetFolder + "AgentRole_" + agentName + "/eval_formula.sh");
+				Process p1 = runtime.exec(sourceFolder + "/../" + "scripts/linux/evaluate.sh");
+				java.io.InputStream is = (java.io.InputStream) p1.getInputStream();
+				File logfile = new File(targetFolder + "/teste.txt");
+				FileOutputStream fop = new FileOutputStream(logfile);
+				int i = 0;
+				while((i = is.read()) != -1)
+				{
+					fop.write((char)i);
+				}
+				
+				
+//				Spawn spawn = new Spawn( new File(sourceFolder + "/../" + "scripts/linux"), out, out, this, new String[]{cmd, arg1, arg2, arg3});
+//				spawn.start();				
 				System.out.println("Initing evaluation of " + ad.planbase.size() + " leaf-tasks with current tree depth of " + currentDepth);
 				System.out.println("Waiting for PRISM model to be built");
-			} catch (CodeGenerationException e) {
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (CodeGenerationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

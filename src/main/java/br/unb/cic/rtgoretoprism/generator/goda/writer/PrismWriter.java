@@ -102,6 +102,7 @@ public class PrismWriter {
 	private StringBuilder rewardModule = new StringBuilder();
 	private String evalFormulaParams = "";
 	private String evalFormulaReplace = "";
+	private StringBuilder evalFormulaContexts = new StringBuilder();
 
 	/** PRISM patterns */
 	private String leafGoalPattern;
@@ -450,11 +451,15 @@ public class PrismWriter {
 
 		if(contextPresent){
 			String ctxId = getContextId(plan);
-			evalFormulaParams += "CTX_" + ctxId + "=\"1\";\n";
-			evalFormulaReplace += " -e \"s/CTX_" + ctxId + "/$CTX_" + ctxId + "/g\"";
+			
+			if (!evalFormulaContexts.toString().contains("CTX_" + ctxId + "=\"1\";\n")) {
+				evalFormulaContexts.append("CTX_" + ctxId + "=\"1\";\n");
+				evalFormulaParams += "CTX_" + ctxId + "=\"1\";\n";
+				evalFormulaReplace += " -e \"s/CTX_" + ctxId + "/$CTX_" + ctxId + "/g\"";
+			}
 			
 			if (nonDeterminismCtx) {
-				sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));
+				sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));	
 			}
 			else {
 				sbHeader.append(getContextHeader(plan));
