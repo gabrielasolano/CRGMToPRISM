@@ -374,7 +374,10 @@ public class PARAMProducer {
 			else {
 				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
 				if (reliability) {
-					formula = param.getSequentialOrReliability((String[]) childrenNodes.toArray(new String[0]));
+					formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
+					for (int i = 2; i < childrenNodes.size(); i++) {
+						formula = "( - " + formula + " * " + childrenNodes.get(i) + " + " + formula + " + " + childrenNodes.get(i) + " ) ";
+					}
 				}
 				else {
 					formula = param.getSequentialOrCost((String[]) childrenNodes.toArray(new String[0]));
@@ -390,7 +393,10 @@ public class PARAMProducer {
 			else {
 				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
 				if (reliability) {
-					formula = param.getSequentialOrReliability((String[]) childrenNodes.toArray(new String[0]));
+					formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
+					for (int i = 2; i < childrenNodes.size(); i++) {
+						formula = "( - " + formula + " * " + childrenNodes.get(i) + " + " + formula + " + " + childrenNodes.get(i) + " ) ";
+					}
 				}
 				else {
 					formula = param.getSequentialOrCost((String[]) childrenNodes.toArray(new String[0]));
