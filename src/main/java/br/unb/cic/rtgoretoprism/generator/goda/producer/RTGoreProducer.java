@@ -495,9 +495,22 @@ public class RTGoreProducer {
 			public int compare(TroposIntentional gA, TroposIntentional gB) {
 				String idA = AgentDefinition.parseElId(gA.getName()).replaceAll("[TG]", "");
 				String idB = AgentDefinition.parseElId(gB.getName()).replaceAll("[TG]", "");
+				String idAStringPart = idA.replaceAll("\\d", "");
+				String idBStringPart = idB.replaceAll("\\d", "");
+
+				if(idAStringPart.equalsIgnoreCase(idBStringPart))
+				{
+					return extractInt(idA) - extractInt(idB);
+				}
 				return idA.compareToIgnoreCase(idB);
 			}
 		});
+	}
+
+	int extractInt(String s) {
+		String num = s.replaceAll("\\D", "");
+		// return 0 if no digits found
+		return num.isEmpty() ? 0 : Integer.parseInt(num);
 	}
 
 	/*private Set<Actor> getSystemActors(){

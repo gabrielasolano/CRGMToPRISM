@@ -467,6 +467,8 @@ public class PrismWriter {
 		}
 		processPlanFormula(plan, planFormula, plan.getRoot().getDecomposition(), nonDeterminismCtx);
 	
+		evalFormulaParams += "W_" + plan.getClearElId() + "=\"1\";\n";
+		evalFormulaReplace += " -e \"s/W_" + plan.getClearElId() + "/$W_" + plan.getClearElId() + "/g\"";
 		evalFormulaParams += "rTask" + plan.getClearElId() + "=\"0.99\";\n";
 		evalFormulaReplace += " -e \"s/rTask" + plan.getClearElId() + "/$rTask" + plan.getClearElId() + "/g\"";	
 		//Header

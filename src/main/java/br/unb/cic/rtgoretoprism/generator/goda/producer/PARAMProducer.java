@@ -3,6 +3,8 @@ package br.unb.cic.rtgoretoprism.generator.goda.producer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +28,7 @@ import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamOrGenerator;
 import br.unb.cic.rtgoretoprism.paramwrapper.ParamWrapper;
 import br.unb.cic.rtgoretoprism.util.PathLocation;
 import it.itc.sra.taom4e.model.core.informalcore.Actor;
+import it.itc.sra.taom4e.model.core.informalcore.TroposIntentional;
 import it.itc.sra.taom4e.model.core.informalcore.formalcore.FHardGoal;
 
 public class PARAMProducer {
@@ -372,15 +375,45 @@ public class PARAMProducer {
 				}
 			}
 			else {
-				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
+				/*SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
 				if (reliability) {
+					//R(1,2)
 					formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
+					if (!reliability) {
+						formula = formula.replaceAll(childrenNodes.get(0), "R_" + childrenNodes.get(0));
+						formula = formula.replaceAll(childrenNodes.get(1), "R_" + childrenNodes.get(1));
+						String removeFromFormula = formula + " * " + childrenNodes.get(1); //-R1W2
+						formula = formula + " * ( " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
+					}
+					
 					for (int i = 2; i < childrenNodes.size(); i++) {
 						formula = "( - " + formula + " * " + childrenNodes.get(i) + " + " + formula + " + " + childrenNodes.get(i) + " ) ";
 					}
 				}
 				else {
 					formula = param.getSequentialOrCost((String[]) childrenNodes.toArray(new String[0]));
+				}*/
+
+				formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
+				String removeFromFormula = new String();
+				String sumCost = new String();
+				if (!reliability) {
+					formula = formula.replaceAll(childrenNodes.get(0), "R_" + childrenNodes.get(0));
+					formula = formula.replaceAll(childrenNodes.get(1), "R_" + childrenNodes.get(1));
+					removeFromFormula = " - R_" + childrenNodes.get(0) + " * " + childrenNodes.get(1);
+					sumCost = childrenNodes.get(0) + " + " + childrenNodes.get(1);
+				}
+
+				for (int i = 2; i < childrenNodes.size(); i++) {
+					if (!reliability) {
+						removeFromFormula += " - " + formula + " * " + childrenNodes.get(i);
+						sumCost += " + " + childrenNodes.get(i);
+					}
+					formula = "( - " + formula + " * " + childrenNodes.get(i) + " + " + formula + " + " + childrenNodes.get(i) + " ) ";
+					if (!reliability) formula = formula.replaceAll(childrenNodes.get(i), "R_" + childrenNodes.get(i));
+				}
+				if (!reliability) {
+					formula = " ( " + formula + " * ( " + sumCost + " ) " + removeFromFormula + " ) "; 
 				}
 			}
 			return formula;
@@ -391,15 +424,36 @@ public class PARAMProducer {
 				formula = " ( R_" + childrenNodes.get(0) + " * " + childrenNodes.get(0) + " )";
 			}
 			else {
-				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
-				if (reliability) {
-					formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
-					for (int i = 2; i < childrenNodes.size(); i++) {
-						formula = "( - " + formula + " * " + childrenNodes.get(i) + " + " + formula + " + " + childrenNodes.get(i) + " ) ";
-					}
+//				SymbolicParamOrGenerator param = new SymbolicParamOrGenerator();
+//				if (reliability) {
+//					formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
+//					for (int i = 2; i < childrenNodes.size(); i++) {
+//						formula = "( - " + formula + " * " + childrenNodes.get(i) + " + " + formula + " + " + childrenNodes.get(i) + " ) ";
+//					}
+//				}
+//				else {
+//					formula = param.getSequentialOrCost((String[]) childrenNodes.toArray(new String[0]));
+//				}
+				formula = "( - " + childrenNodes.get(0) + " * " + childrenNodes.get(1) + " + " + childrenNodes.get(0) + " + " + childrenNodes.get(1) + " ) ";
+				String removeFromFormula = new String();
+				String sumCost = new String();
+				if (!reliability) {
+					formula = formula.replaceAll(childrenNodes.get(0), "R_" + childrenNodes.get(0));
+					formula = formula.replaceAll(childrenNodes.get(1), "R_" + childrenNodes.get(1));
+					removeFromFormula = " - R_" + childrenNodes.get(0) + " * " + childrenNodes.get(1);
+					sumCost = childrenNodes.get(0) + " + " + childrenNodes.get(1);
 				}
-				else {
-					formula = param.getSequentialOrCost((String[]) childrenNodes.toArray(new String[0]));
+
+				for (int i = 2; i < childrenNodes.size(); i++) {
+					if (!reliability) {
+						removeFromFormula += " - " + formula + " * " + childrenNodes.get(i);
+						sumCost += " + " + childrenNodes.get(i);
+					}
+					formula = "( - " + formula + " * " + childrenNodes.get(i) + " + " + formula + " + " + childrenNodes.get(i) + " ) ";
+					if (!reliability) formula = formula.replaceAll(childrenNodes.get(i), "R_" + childrenNodes.get(i));
+				}
+				if (!reliability) {
+					formula = " ( " + formula + " * ( " + sumCost + " ) " + removeFromFormula + " ) "; 
 				}
 			}
 		}
@@ -416,6 +470,8 @@ public class PARAMProducer {
 			if(child instanceof GoalContainer) ids.add(child.getClearUId());
 			else ids.add(child.getClearElId());
 		}
+		
+		if (ids.size() == 1) return ids;
 		
 		return ids;
 	}
