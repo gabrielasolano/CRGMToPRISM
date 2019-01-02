@@ -78,6 +78,8 @@ public class PrismWriter {
 	private static final String REWARD_TAG				= "$REWARD_STRUCTURE$";
 	private static final String COST_VALUE_TAG			= "$COST$";
 	private static final String CONST_PARAM_TAG			= "$CONST_PARAM$";
+	private static final String PARAMS_BASH_TAG	 		= "$PARAMS_BASH$";
+	private static final String REPLACE_BASH_TAG	 	= "$REPLACE_BASH$";
 
 	private final String constOrParam;
 
@@ -95,9 +97,11 @@ public class PrismWriter {
 	private String basicAgentPackage;
 
 	// Strings that contain the parts of the ADF skeleton, read from file
-	private String header, body, reward;
+	private String header, body, reward, evalBash;
 	private StringBuilder planModules = new StringBuilder();
 	private StringBuilder rewardModule = new StringBuilder();
+	private String evalFormulaParams = "";
+	private String evalFormulaReplace = "";
 
 	/** PRISM patterns */
 	private String leafGoalPattern;
@@ -159,14 +163,17 @@ public class PrismWriter {
 		header = ManageWriter.readFileAsString( prismInputFolder + "modelheader.nm" );
 		body = ManageWriter.readFileAsString( prismInputFolder + "modelbody.nm" );
 		reward = ManageWriter.readFileAsString( prismInputFolder + "modelreward.nm" );
+		evalBash = ManageWriter.readFileAsString( prismInputFolder + "eval_formula.sh" );
 
 		//create the model output dir
 		writeAnOutputDir( agentOutputFolder );
 
 		//create the output PRISM file
 		PrintWriter modelFile = ManageWriter.createFile(ad.getAgentName() + ".nm", agentOutputFolder);
+		PrintWriter evalBashFile = ManageWriter.createFile("eval_formula.sh", agentOutputFolder);
 		writePrismModel( prismInputFolder, ad.rootlist, planOutputFolder, basicAgentPackage, utilPkgName, planPkgName );		
 		printModel( modelFile );
+		printEvalBash( evalBashFile );
 	}
 
 	/**
@@ -443,6 +450,9 @@ public class PrismWriter {
 
 		if(contextPresent){
 			String ctxId = getContextId(plan);
+			evalFormulaParams += "CTX_" + ctxId + "=\"1\";\n";
+			evalFormulaReplace += " -e \"s/CTX_" + ctxId + "/$CTX_" + ctxId + "/g\"";
+			
 			if (nonDeterminismCtx) {
 				sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));
 			}
@@ -457,6 +467,8 @@ public class PrismWriter {
 		}
 		processPlanFormula(plan, planFormula, plan.getRoot().getDecomposition(), nonDeterminismCtx);
 	
+		evalFormulaParams += "rTask" + plan.getClearElId() + "=\"0.99\";\n";
+		evalFormulaReplace += " -e \"s/rTask" + plan.getClearElId() + "/$rTask" + plan.getClearElId() + "/g\"";	
 		//Header
 		planModule = planModule.replace(DEC_HEADER_TAG, sbHeader.toString());
 		//Type
@@ -604,6 +616,14 @@ public class PrismWriter {
 	
 		String model = header + "\n" + body + reward;
 		ManageWriter.printModel(adf, model);
+	}
+	
+	private void printEvalBash( PrintWriter pw ){
+
+		evalBash = evalBash.replace(PARAMS_BASH_TAG, evalFormulaParams);
+		evalBash = evalBash.replace(REPLACE_BASH_TAG, evalFormulaReplace);
+
+		ManageWriter.printModel(pw, evalBash);
 	}
 	
 	private String declareRewardVariable() {
