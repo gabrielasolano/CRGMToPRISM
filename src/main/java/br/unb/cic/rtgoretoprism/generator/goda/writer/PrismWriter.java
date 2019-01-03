@@ -478,10 +478,10 @@ public class PrismWriter {
 	
 		evalFormulaParams += "W_" + plan.getClearElId() + "=\"1\";\n";
 		evalFormulaReplace += " -e \"s/W_" + plan.getClearElId() + "/$W_" + plan.getClearElId() + "/g\"";
-		evalFormulaParams += "r" + plan.getClearElId() + "=\"0.99\";\n";
-		evalFormulaReplace += " -e \"s/r" + plan.getClearElId() + "/$r" + plan.getClearElId() + "/g\"";	
-		evalFormulaParams += "f" + plan.getClearElId() + "=\"0.99\";\n";
-		evalFormulaReplace += " -e \"s/f" + plan.getClearElId() + "/$f" + plan.getClearElId() + "/g\"";	
+		evalFormulaParams += "R_" + plan.getClearElId() + "=\"0.99\";\n";
+		evalFormulaReplace += " -e \"s/R_" + plan.getClearElId() + "/$R_" + plan.getClearElId() + "/g\"";	
+		evalFormulaParams += "F_" + plan.getClearElId() + "=\"0.99\";\n";
+		evalFormulaReplace += " -e \"s/F_" + plan.getClearElId() + "/$F_" + plan.getClearElId() + "/g\"";	
 		//Header
 		planModule = planModule.replace(DEC_HEADER_TAG, sbHeader.toString());
 		//Type

@@ -3,8 +3,6 @@ package br.unb.cic.rtgoretoprism.generator.goda.producer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,11 +22,9 @@ import br.unb.cic.rtgoretoprism.model.kl.GoalContainer;
 import br.unb.cic.rtgoretoprism.model.kl.PlanContainer;
 import br.unb.cic.rtgoretoprism.model.kl.RTContainer;
 import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamAndGenerator;
-import br.unb.cic.rtgoretoprism.paramformula.SymbolicParamOrGenerator;
 import br.unb.cic.rtgoretoprism.paramwrapper.ParamWrapper;
 import br.unb.cic.rtgoretoprism.util.PathLocation;
 import it.itc.sra.taom4e.model.core.informalcore.Actor;
-import it.itc.sra.taom4e.model.core.informalcore.TroposIntentional;
 import it.itc.sra.taom4e.model.core.informalcore.formalcore.FHardGoal;
 
 public class PARAMProducer {
@@ -253,9 +249,10 @@ public class PARAMProducer {
 				//Call to param (reliability)
 				ParamWrapper paramWrapper = new ParamWrapper(toolsFolder, nodeId);
 				nodeForm = paramWrapper.getFormula(model);
-				nodeForm = nodeForm.replaceAll("1\\*", "");
+				nodeForm = nodeForm.replaceFirst("1\\*", "");
 				
-				this.varReliabilityInformation.add("//" + nodeForm + " = reliability of node " + nodeId + "\n");
+				this.varReliabilityInformation.add("//R_" + nodeId + " = reliability of node " + nodeId + "\n");
+				this.varReliabilityInformation.add("//F_" + nodeId + " = frequency of node " + nodeId + "\n");
 			}
 			else {
 				//Cost
