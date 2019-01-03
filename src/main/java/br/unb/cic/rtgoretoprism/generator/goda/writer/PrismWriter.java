@@ -414,15 +414,15 @@ public class PrismWriter {
 		singlePattern = new String(singlePattern);
 	
 		String andDecPattern = new String(this.andDecPattern),
-				ctxSkipPattern = new String(this.ctxSkipPattern),
-				ctxFailPattern = new String(this.ctxFailPattern);
+				ctxSkipPattern = new String(this.ctxSkipPattern);
+				//ctxFailPattern = new String(this.ctxFailPattern);
 	
 		PlanContainer plan = (PlanContainer) root;
 		String planModule;
 		StringBuilder planFormula = new StringBuilder();
 	
 		boolean contextPresent = false;
-		boolean goalContext = false;
+		//boolean goalContext = false;
 		boolean nonDeterminismCtx = false;
 	
 		if(constOrParam.equals("const") &&
@@ -431,11 +431,11 @@ public class PrismWriter {
 	
 			contextPresent = true;
 	
-			for (String ctxCondition : plan.getFulfillmentConditions()){
+			/*for (String ctxCondition : plan.getFulfillmentConditions()){
 				Object [] parsedCtxs = CtxParser.parseRegex(ctxCondition);
 				if (((CtxSymbols) parsedCtxs[2] == CtxSymbols.COND) || (plan.getClearElId().contains("X"))) 
 					goalContext = true; 
-			}
+			}*/
 			
 			String ctx = getContextsInfo(plan).toString();
 			RTContainer node = getKeyRTContainer(this.nonDeterminismCtxList,ctx);
@@ -458,14 +458,18 @@ public class PrismWriter {
 				evalFormulaReplace += " -e \"s/CTX_" + ctxId + "/$CTX_" + ctxId + "/g\"";
 			}
 			
-			if (nonDeterminismCtx) {
+			sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));	
+			if (!nonDeterminismCtx) sbHeader.append(getContextHeader(plan));
+			
+			/*if (nonDeterminismCtx) {
 				sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));	
 			}
 			else {
 				sbHeader.append(getContextHeader(plan));
+				
 				if (goalContext) sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));
 				else sbType.append(ctxFailPattern);
-			}
+			}*/
 		}
 		else {
 			sbType.append(andDecPattern);
@@ -474,8 +478,10 @@ public class PrismWriter {
 	
 		evalFormulaParams += "W_" + plan.getClearElId() + "=\"1\";\n";
 		evalFormulaReplace += " -e \"s/W_" + plan.getClearElId() + "/$W_" + plan.getClearElId() + "/g\"";
-		evalFormulaParams += "rTask" + plan.getClearElId() + "=\"0.99\";\n";
-		evalFormulaReplace += " -e \"s/rTask" + plan.getClearElId() + "/$rTask" + plan.getClearElId() + "/g\"";	
+		evalFormulaParams += "r" + plan.getClearElId() + "=\"0.99\";\n";
+		evalFormulaReplace += " -e \"s/r" + plan.getClearElId() + "/$r" + plan.getClearElId() + "/g\"";	
+		evalFormulaParams += "f" + plan.getClearElId() + "=\"0.99\";\n";
+		evalFormulaReplace += " -e \"s/f" + plan.getClearElId() + "/$f" + plan.getClearElId() + "/g\"";	
 		//Header
 		planModule = planModule.replace(DEC_HEADER_TAG, sbHeader.toString());
 		//Type
@@ -547,8 +553,15 @@ public class PrismWriter {
 		if (alt.equals(root)) return true;
 		return false;
 	}
-
+	
 	private void processPlanFormula(PlanContainer plan, StringBuilder planFormula, Const decType, boolean nonDeterminismCtx) throws IOException{
+		
+		String op = planFormula.length() == 0 ? "" : " & ";
+		String formula = op + "s" + plan.getClearElId() + "=2 | s" + plan.getClearElId() + "=3";
+		planFormula.append(formula);
+	}
+
+	/*private void processPlanFormula(PlanContainer plan, StringBuilder planFormula, Const decType, boolean nonDeterminismCtx) throws IOException{
 	
 		String op = planFormula.length() == 0 ? "" : " & ";
 		switch(decType){
@@ -582,7 +595,7 @@ public class PrismWriter {
 		if(sb.length() > 0)
 			sb.insert(0, " | (s" + plan.getClearElId() + "=3 & ").append(")");
 		return sb.toString();
-	}
+	}*/
 	
 	private String getContextId(RTContainer plan) throws ParseCancellationException, IOException {
 		String ctx = getContextsInfo(plan).toString();
