@@ -557,7 +557,7 @@ public class PrismWriter {
 	private void processPlanFormula(PlanContainer plan, StringBuilder planFormula, Const decType, boolean nonDeterminismCtx) throws IOException{
 		
 		String op = planFormula.length() == 0 ? "" : " & ";
-		String formula = op + "s" + plan.getClearElId() + "=2 | s" + plan.getClearElId() + "=3";
+		String formula = op + "s" + plan.getClearElId() + "=2";
 		planFormula.append(formula);
 	}
 
