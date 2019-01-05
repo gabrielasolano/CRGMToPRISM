@@ -60,7 +60,7 @@ public class PARAMProducer {
 		this.allActors = selectedActors;
 		this.allGoals = selectedGoals;
 		this.ad = ad;
-		this.agentName = ad.getAgentName();
+		this.agentName = "EvaluationActor";
 	}
 
 	public void run() throws CodeGenerationException, IOException {
@@ -169,9 +169,14 @@ public class PARAMProducer {
 
 		reliabilityForm = composeFormula(reliabilityForm, true);
 		costForm = composeFormula(costForm, false);
+		
+		/** For testing only (comment otherwise)**/
+		//reliabilityForm = reliabilityForm.substring(0, reliabilityForm.indexOf("/"));
+		//costForm = costForm.substring(0, costForm.indexOf("/"));
+		/*****************************************/
 
-		//agentName = "EvaluationActor";
 		String output = targetFolder + "/" + PathLocation.BASIC_AGENT_PACKAGE_PREFIX + agentName + "/";
+		//String output = targetFolder + PathLocation.BASIC_AGENT_PACKAGE_PREFIX + agentName + "/";
 
 		PrintWriter reliabiltyFormula = ManageWriter.createFile("reliability.out", output);
 		PrintWriter costFormula = ManageWriter.createFile("cost.out", output);

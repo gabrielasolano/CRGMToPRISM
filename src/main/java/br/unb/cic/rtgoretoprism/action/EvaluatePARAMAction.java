@@ -33,8 +33,10 @@ package br.unb.cic.rtgoretoprism.action;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -55,11 +57,14 @@ import br.unb.cic.rtgoretoprism.console.ConsoleUtil;
 import br.unb.cic.rtgoretoprism.generator.CodeGenerationException;
 import br.unb.cic.rtgoretoprism.generator.goda.producer.CRGMEvaluationProducer;
 import br.unb.cic.rtgoretoprism.generator.goda.producer.PARAMProducer;
+import br.unb.cic.rtgoretoprism.generator.goda.writer.ManageWriter;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.PrismWriter;
 import br.unb.cic.rtgoretoprism.generator.goda.writer.dtmc.DTMCWriter;
 import br.unb.cic.rtgoretoprism.generator.kl.AgentDefinition;
 import br.unb.cic.rtgoretoprism.gui.EvaluationSettingsDialog;
 import br.unb.cic.rtgoretoprism.model.kl.Const;
+import br.unb.cic.rtgoretoprism.model.kl.PlanContainer;
+import br.unb.cic.rtgoretoprism.model.kl.RTContainer;
 import br.unb.cic.rtgoretoprism.util.FileUtility;
 import it.itc.sra.taom4e.model.core.informalcore.Plan;
 
@@ -161,7 +166,7 @@ public class EvaluatePARAMAction extends AbstractCodeGeneractionAction {
 		public void evaluatePrism(){
 
 	        try {	        	
-	        	String cmd = "./generate.sh";
+	        	String cmd = "./evaluate.sh";
 				String arg1 = agentName;
 				String arg2 = "reachability.pctl";
 				String arg3 = BRANCHES - 1 + "";
@@ -171,20 +176,19 @@ public class EvaluatePARAMAction extends AbstractCodeGeneractionAction {
 				MessageConsoleStream out = myConsole.newMessageStream();
 				
 				//CRGMEvaluationCtProducer evaluationProducer = new CRGMEvaluationCtProducer(currentDepth, currentDepth - 1, BRANCHES, agentName);        								
-				//CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.AND, Const.SEQ, Const.TRY, agentName);
-				CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.OR, Const.SEQ, Const.DM, agentName);
+				CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.AND, Const.SEQ, Const.AND, agentName);
+				//CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.OR, Const.SEQ, Const.DM, agentName);
 				AgentDefinition ad = evaluationProducer.generateCRGM();
-				PrismWriter writer = new DTMCWriter( ad, new ArrayList<Plan>(), sourceFolder, targetFolder, true);
-				writer.writeModel();	
+				generateEvalFormula(ad);
 				PARAMProducer param = new PARAMProducer(ad, selectedActors, selectedGoals, sourceFolder, targetFolder, toolsFolder);
 				param.run();
 				Runtime runtime = Runtime.getRuntime();
 				runtime.exec("cp " + sourceFolder + "/../" + "scripts/linux/evaluate.sh " + targetFolder + "AgentRole_" + agentName + "/");
 				runtime.exec("chmod +x" + targetFolder + "AgentRole_" + agentName + "/evaluate.sh");
 				runtime.exec("chmod +x" + targetFolder + "AgentRole_" + agentName + "/eval_formula.sh");
-				Process p1 = runtime.exec(sourceFolder + "/../" + "scripts/linux/evaluate.sh");
+				Process p1 = runtime.exec(targetFolder + "AgentRole_" + agentName + "/evaluate.sh");
 				java.io.InputStream is = (java.io.InputStream) p1.getInputStream();
-				File logfile = new File(targetFolder + "/teste.txt");
+				File logfile = new File(targetFolder + "AgentRole_" + agentName + "/teste.txt");
 				FileOutputStream fop = new FileOutputStream(logfile);
 				int i = 0;
 				while((i = is.read()) != -1)
@@ -193,8 +197,9 @@ public class EvaluatePARAMAction extends AbstractCodeGeneractionAction {
 				}
 				
 				
-//				Spawn spawn = new Spawn( new File(sourceFolder + "/../" + "scripts/linux"), out, out, this, new String[]{cmd, arg1, arg2, arg3});
-//				spawn.start();				
+//				Spawn spawn = new Spawn( new File(targetFolder + "AgentRole_" + agentName + "/"), out, out, this, new String[]{cmd});
+//				spawn.start();		
+				
 				System.out.println("Initing evaluation of " + ad.planbase.size() + " leaf-tasks with current tree depth of " + currentDepth);
 				System.out.println("Waiting for PRISM model to be built");
 			} catch (IOException e) {
@@ -206,6 +211,33 @@ public class EvaluatePARAMAction extends AbstractCodeGeneractionAction {
 			}
 		}
 		
+		private void generateEvalFormula(AgentDefinition ad) throws CodeGenerationException {
+			// TODO Auto-generated method stub
+			RTContainer root = ad.rootlist.getFirst();
+			StringBuilder evalFormulaParams = new StringBuilder();
+			StringBuilder evalFormulaReplace = new StringBuilder();
+			
+			for (PlanContainer plan : root.getDecompPlans()) {
+				if (!plan.getFulfillmentConditions().isEmpty()) {
+					evalFormulaParams.append("CTX_" + plan.getClearElId() + "=\"1\";\n");
+					evalFormulaReplace.append(" -e \"s/CTX_" + plan.getClearElId() + "/$CTX_" + plan.getClearElId() + "/g\"");
+				}
+				evalFormulaParams.append("W_" + plan.getClearElId() + "=\"1\";\n");
+				evalFormulaReplace.append(" -e \"s/W_" + plan.getClearElId() + "/$W_" + plan.getClearElId() + "/g\"");
+				evalFormulaParams.append("R_" + plan.getClearElId() + "=\"0.99\";\n");
+				evalFormulaReplace.append(" -e \"s/R_" + plan.getClearElId() + "/$R_" + plan.getClearElId() + "/g\"");	
+				evalFormulaParams.append("F_" + plan.getClearElId() + "=\"0.99\";\n");
+				evalFormulaReplace.append(" -e \"s/F_" + plan.getClearElId() + "/$F_" + plan.getClearElId() + "/g\"");	
+			
+			}
+			
+			PrintWriter evalBashFile = ManageWriter.createFile("eval_formula.sh", targetFolder + "AgentRole_" + agentName + "/");
+			String eval = "#!/bin/bash\n" + evalFormulaParams.toString() 
+				+ "\nsed " + evalFormulaReplace.toString() + " $1 |  gawk '{print \"scale=20;\"$0}' | bc"
+				+ "\nexit 0;";
+			ManageWriter.printModel(evalBashFile, eval);
+		}
+
 		public void evaluateFormula(){
 			String cmd = "./evaluate.sh";
 			String arg1 = agentName + ".out";
@@ -219,38 +251,38 @@ public class EvaluatePARAMAction extends AbstractCodeGeneractionAction {
 		public void runAfterExit(int exitStatus, ArrayList<String> list) {
 			
 			list = new ArrayList<String>(list);
-			if(exitStatus == 0){
-								
-				if(evaluate){					
-					addTimeResult(list, EVAL_TIME);
-					System.out.println("Parametric formula evaluated, exit status: " + exitStatus); 
-					if(currentExp >= MAX_EXPS - 1){
-						increaseCount();
-						writeResults();
-						return;
-					}else{
-						currentExp++;
-						evaluateFormula();
-					}
-				}else{
-					addTimeResult(list, TERM_TIME);
-					System.out.println("Parametric formula generated, exit status: " + exitStatus); 
-				
-					if(currentExp >= MAX_EXPS - 1){
-						evaluate = true;						
-						currentExp = 0;
-						evaluateFormula();
-					}else{
-						currentExp++;
-						evaluatePrism();
-					}
-				}
-			}else{
-				if(evaluate){
-					increaseCount();
-					System.out.println("Error generating parametric formula");
-				}
-			}					
+//			if(exitStatus == 0){
+//								
+//				if(evaluate){					
+//					addTimeResult(list, EVAL_TIME);
+//					System.out.println("Parametric formula evaluated, exit status: " + exitStatus); 
+//					if(currentExp >= MAX_EXPS - 1){
+//						increaseCount();
+//						writeResults();
+//						return;
+//					}else{
+//						currentExp++;
+//						evaluateFormula();
+//					}
+//				}else{
+//					addTimeResult(list, TERM_TIME);
+//					System.out.println("Parametric formula generated, exit status: " + exitStatus); 
+//				
+//					if(currentExp >= MAX_EXPS - 1){
+//						evaluate = true;						
+//						currentExp = 0;
+//						evaluateFormula();
+//					}else{
+//						currentExp++;
+//						evaluatePrism();
+//					}
+//				}
+//			}else{
+//				if(evaluate){
+//					increaseCount();
+//					System.out.println("Error generating parametric formula");
+//				}
+//			}					
 		}
 		
 		private void writeResults(){
