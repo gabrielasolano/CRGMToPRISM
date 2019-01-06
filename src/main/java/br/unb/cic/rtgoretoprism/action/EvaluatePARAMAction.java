@@ -176,12 +176,16 @@ public class EvaluatePARAMAction extends AbstractCodeGeneractionAction {
 				MessageConsoleStream out = myConsole.newMessageStream();
 				
 				//CRGMEvaluationCtProducer evaluationProducer = new CRGMEvaluationCtProducer(currentDepth, currentDepth - 1, BRANCHES, agentName);        								
-				CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.AND, Const.SEQ, Const.AND, agentName);
+				CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.OR, Const.SEQ, Const.OR, agentName);
+				//CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.AND, Const.SEQ, Const.AND, agentName);
 				//CRGMEvaluationProducer evaluationProducer = new CRGMEvaluationProducer(MAX_DEPTH, Const.OR, Const.SEQ, Const.DM, agentName);
 				AgentDefinition ad = evaluationProducer.generateCRGM();
 				generateEvalFormula(ad);
+//				PrismWriter writer = new DTMCWriter( ad, new ArrayList<Plan>(), sourceFolder, targetFolder, false);
+//				writer.writeModel();
 				PARAMProducer param = new PARAMProducer(ad, selectedActors, selectedGoals, sourceFolder, targetFolder, toolsFolder);
 				param.run();
+				
 				Runtime runtime = Runtime.getRuntime();
 				runtime.exec("cp " + sourceFolder + "/../" + "scripts/linux/evaluate.sh " + targetFolder + "AgentRole_" + agentName + "/");
 				runtime.exec("chmod +x" + targetFolder + "AgentRole_" + agentName + "/evaluate.sh");

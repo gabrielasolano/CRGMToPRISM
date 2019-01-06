@@ -67,6 +67,8 @@ public class PARAMProducer {
 
 		for(Actor actor : allActors){
 
+			long startTime = 0;
+			
 			if (this.ad == null) {
 				RTGoreProducer producer = new RTGoreProducer(allActors, allGoals, sourceFolder, targetFolder, false);
 				AgentDefinition ad = producer.run();
@@ -74,17 +76,17 @@ public class PARAMProducer {
 				this.ad = ad;
 				agentName = ad.getAgentName();
 			}
-			
-			long startTime = new Date().getTime();
+
 			ATCConsole.println("Generating PARAM formulas for: " + agentName);
 
 			// Compose goal formula
+			startTime = new Date().getTime();
 			String reliabilityForm = composeNodeForm(ad.rootlist.getFirst(), true);
 			String costForm = composeNodeForm(ad.rootlist.getFirst(), false);
-			
+
 			reliabilityForm = cleanNodeForm(reliabilityForm, true);
 			costForm = cleanNodeForm(costForm, false);
-			
+
 			//Print formula
 			printFormula(reliabilityForm, costForm);
 			ATCConsole.println( "PARAM formulas created in " + (new Date().getTime() - startTime) + "ms.");
@@ -173,11 +175,11 @@ public class PARAMProducer {
 		/** For testing only (comment otherwise)**/
 		//reliabilityForm = reliabilityForm.substring(0, reliabilityForm.indexOf("/"));
 		//costForm = costForm.substring(0, costForm.indexOf("/"));
+		//String output = targetFolder + PathLocation.BASIC_AGENT_PACKAGE_PREFIX + agentName + "/";
 		/*****************************************/
 
 		String output = targetFolder + "/" + PathLocation.BASIC_AGENT_PACKAGE_PREFIX + agentName + "/";
-		//String output = targetFolder + PathLocation.BASIC_AGENT_PACKAGE_PREFIX + agentName + "/";
-
+		
 		PrintWriter reliabiltyFormula = ManageWriter.createFile("reliability.out", output);
 		PrintWriter costFormula = ManageWriter.createFile("cost.out", output);
 		
