@@ -109,6 +109,8 @@ public class PrismWriter {
 	private String andDecPattern;
 	private String ctxHeaderPattern;
 	private String ctxFailPattern;
+	private String optPattern;
+	private String optHeaderPattern;
 	private String ctxSkipPattern;
 	private String rewardPattern;
 	private String ndPattern;
@@ -204,6 +206,8 @@ public class PrismWriter {
 		ndPattern						= ManageWriter.readFileAsString(input + "pattern_nondeterminism.nm");
 		ndHeaderPattern					= ManageWriter.readFileAsString(input + "pattern_nd_header.nm");
 		ndBodyPattern					= ManageWriter.readFileAsString(input + "pattern_nd_body.nm");
+		optPattern						= ManageWriter.readFileAsString(input + "pattern_opt.nm");
+		optHeaderPattern				= ManageWriter.readFileAsString(input + "pattern_opt_header.nm");
 
 		Collections.sort(rootGoals);
 
@@ -414,7 +418,9 @@ public class PrismWriter {
 		singlePattern = new String(singlePattern);
 	
 		String andDecPattern = new String(this.andDecPattern),
-				ctxSkipPattern = new String(this.ctxSkipPattern);
+				ctxSkipPattern = new String(this.ctxSkipPattern),
+				optPattern = new String(this.optPattern),
+				optHeaderPattern = new String(this.optHeaderPattern);
 				//ctxFailPattern = new String(this.ctxFailPattern);
 	
 		PlanContainer plan = (PlanContainer) root;
@@ -448,7 +454,18 @@ public class PrismWriter {
 	
 		StringBuilder sbHeader = new StringBuilder();
 		StringBuilder sbType = new StringBuilder();
-
+		
+		if (plan.isOptional()) {
+			if (contextPresent) {
+				optPattern = optPattern.replace("$IF_CTX$", "*CTX_$GID$");
+			}
+			optPattern = optPattern.replace("$IF_CTX$", "");
+			sbHeader.append(optHeaderPattern);
+			sbType.append(optPattern);
+			
+			evalFormulaParams += "OPT_" + plan.getClearElId() + "=\"1\";\n";
+			evalFormulaReplace += " -e \"sOPT_" + plan.getClearElId() + "/$OPT_" + plan.getClearElId() + "/g\"";
+		}
 		if(contextPresent){
 			String ctxId = getContextId(plan);
 			
@@ -458,7 +475,7 @@ public class PrismWriter {
 				evalFormulaReplace += " -e \"s/CTX_" + ctxId + "/$CTX_" + ctxId + "/g\"";
 			}
 			
-			sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));	
+			if (!plan.isOptional()) sbType.append(ctxSkipPattern.replace("$CTX_GID$", "CTX_" + ctxId));	
 			if (!nonDeterminismCtx) sbHeader.append(getContextHeader(plan));
 			
 			/*if (nonDeterminismCtx) {
@@ -471,7 +488,7 @@ public class PrismWriter {
 				else sbType.append(ctxFailPattern);
 			}*/
 		}
-		else {
+		else if (!plan.isOptional()){
 			sbType.append(andDecPattern);
 		}
 		processPlanFormula(plan, planFormula, plan.getRoot().getDecomposition(), nonDeterminismCtx);
@@ -558,6 +575,7 @@ public class PrismWriter {
 		
 		String op = planFormula.length() == 0 ? "" : " & ";
 		String formula = op + "s" + plan.getClearElId() + "=2";
+		if (plan.isOptional()) formula += " | s" + plan.getClearElId() + "=3";
 		planFormula.append(formula);
 	}
 

@@ -260,6 +260,10 @@ public class PARAMProducer {
 				
 				this.varReliabilityInformation.add("//R_" + nodeId + " = reliability of node " + nodeId + "\n");
 				this.varReliabilityInformation.add("//F_" + nodeId + " = frequency of node " + nodeId + "\n");
+				if (rootNode.isOptional()) {
+					nodeForm += "*OPT_" + nodeId;
+					this.varReliabilityInformation.add("//OPT_" + nodeId + " = optionality of node " + nodeId + "\n");	
+				}
 			}
 			else {
 				//Cost

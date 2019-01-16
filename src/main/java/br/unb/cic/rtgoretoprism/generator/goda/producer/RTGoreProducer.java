@@ -246,14 +246,16 @@ public class RTGoreProducer {
 		}
 
 		if (gc.getClearElId().contains("X")) {
-			String fulfillment = "assertion condition " + gc.getClearElId() + " = true";
-			gc.addFulfillmentConditions(fulfillment);
-			PlanContainer unknownPlan = new PlanContainer(gc, fulfillment);
+			gc.setOptional(true);
+			//String fulfillment = "assertion condition " + gc.getClearElId() + " = true";
+			//gc.addFulfillmentConditions(fulfillment);
+			PlanContainer unknownPlan = new PlanContainer(gc/*, fulfillment*/);
 			unknownPlan.setElId("TX");
 			unknownPlan.setTimePath(gc.getTimePath());
 			unknownPlan.setTimeSlot(gc.getTimeSlot());
 			unknownPlan.setPrevTimePath(gc.getPrevTimePath());
 			unknownPlan.setFutTimePath(gc.getFutTimePath());
+			unknownPlan.setOptional(true);
 			gc.addMERealPlan(unknownPlan);
 		}
 	}
@@ -364,7 +366,8 @@ public class RTGoreProducer {
 			storeDecisionMakingNodes(pc);
 		}
 
-		if (pc.getClearElId().contains("X")) pc.addFulfillmentConditions("assertion trigger " + pc.getClearElId() + " = true");
+		//if (pc.getClearElId().contains("X")) pc.addFulfillmentConditions("assertion trigger " + pc.getClearElId() + " = true");
+		if (pc.getClearElId().contains("X")) pc.setOptional(true);
 	}
 
 	private void storeDecisionMakingNodes(RTContainer pc) {

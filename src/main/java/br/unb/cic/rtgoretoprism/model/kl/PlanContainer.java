@@ -61,16 +61,16 @@ public class PlanContainer extends RTContainer{
 		this.addFulfillmentConditions(p.getCreationProperty());
 	}
 
-	public PlanContainer(GoalContainer gc, String fulfillment) {
+	public PlanContainer(GoalContainer gc/*, String fulfillment*/) {
 		super();
 		
 		meGoals = new ArrayList<GoalContainer>();
 		meGoals.add(gc);
 		parentlist = null;
 		
-		List<String> list = new ArrayList<String>();
+		/*List<String> list = new ArrayList<String>();
 		list.add(fulfillment);
-		this.addFulfillmentConditions(list);
+		this.addFulfillmentConditions(list);*/
 	}
 
 	/**
